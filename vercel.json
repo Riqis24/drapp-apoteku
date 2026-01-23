@@ -1,7 +1,6 @@
 {
     "version": 2,
     "framework": null,
-    "outputDirectory": ".",
     "functions": {
         "api/index.php": { "runtime": "vercel-php@0.7.1" }
     },
@@ -11,6 +10,7 @@
         { "src": "/favicon.ico", "dest": "/public/favicon.ico" },
         { "src": "/(.*)", "dest": "/api/index.php" }
     ],
+    "cleanUrls": true,
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "true",
