@@ -1,9 +1,10 @@
 {
     "version": 2,
     "framework": null,
+    "outputDirectory": ".",
     "functions": {
         "api/*.php": {
-            "runtime": "vercel-php@0.7.5",
+            "runtime": "vercel-php@0.7.0",
             "config": { "nodeVersion": "20.x" }
         }
     },
