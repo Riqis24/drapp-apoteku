@@ -14,7 +14,7 @@ class ArMstrController extends Controller
     public function index()
     {
         $ars = ArMstr::with('customer')->get();
-        return view('Ar.ArMstrList', compact('ars'));
+        return view('ar.ArMstrList', compact('ars'));
     }
 
     /**
