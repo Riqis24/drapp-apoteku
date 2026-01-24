@@ -53,8 +53,8 @@
 
 <body onload="window.print()">
     <div class="text-center">
-        <h3 style="margin-bottom: 2px;">{{ $apotek->name }}</h3>
-        <p style="margin-top: 0; font-size: 8pt;">{{ $apotek->address }}</p>
+        <h3 style="margin-bottom: 2px;">{{ $apotek->name ?? '-' }}</h3>
+        <p style="margin-top: 0; font-size: 8pt;">{{ $apotek->address ?? '-' }}</p>
     </div>
 
     <div class="divider"></div>
