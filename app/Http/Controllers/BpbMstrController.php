@@ -24,7 +24,7 @@ class BpbMstrController extends Controller
 {
     public function index()
     {
-        $bpb = BpbMstr::with(['supplier', 'po'])->orderByDesc('bpb_mstr_id')->get();
+        $bpb = BpbMstr::with(['supplier', 'po', 'location', 'user'])->orderByDesc('bpb_mstr_id')->get();
         return view('bpb.BpbMstrList', compact('bpb'));
     }
 

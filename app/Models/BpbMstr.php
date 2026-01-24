@@ -68,4 +68,14 @@ class BpbMstr extends Model
     {
         return $this->hasMany(BpbDet::class, 'bpb_det_mstrid', 'bpb_mstr_id');
     }
+
+    public function location()
+    {
+        return $this->belongsTo(LocMstr::class, 'bpb_mstr_locid', 'loc_mstr_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'bpb_mstr_createdby', 'user_mstr_id');
+    }
 }

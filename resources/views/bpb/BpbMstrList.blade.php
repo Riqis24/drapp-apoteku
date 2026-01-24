@@ -22,29 +22,33 @@
                             <thead class="table-dark">
                                 <tr>
                                     <th style="text-align: center">No</th>
-                                    <th style="text-align: center">Tanggal BPB</th>
-                                    <th style="text-align: center">BPB #</th>
+                                    <th style="text-align: center">Tanggal</th>
+                                    <th style="text-align: center">No #</th>
                                     <th style="text-align: center">Faktur #</th>
                                     <th style="text-align: center">SJ #</th>
                                     <th style="text-align: center">PO #</th>
                                     <th style="text-align: center">Supplier</th>
+                                    <th style="text-align: center">Gudang</th>
                                     <th style="text-align: center">Remark</th>
                                     <th style="text-align: center">Created At</th>
+                                    <th style="text-align: center">Created By</th>
                                     <th style="text-align: center">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($bpb as $item)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $item->bpb_mstr_date }}</td>
-                                        <td>{{ $item->bpb_mstr_nbr }}</td>
+                                        <td style="text-align:right">{{ $loop->iteration }}</td>
+                                        <td style="text-align:center">{{ $item->bpb_mstr_date }}</td>
+                                        <td style="text-align:center">{{ $item->bpb_mstr_nbr }}</td>
                                         <td>{{ $item->bpb_mstr_nofaktur }}</td>
                                         <td>{{ $item->bpb_mstr_nosj }}</td>
-                                        <td>{{ $item->po->po_mstr_nbr ?? '-' }}</td>
+                                        <td style="text-align:center">{{ $item->po->po_mstr_nbr ?? '-' }}</td>
                                         <td>{{ $item->supplier->supp_mstr_name ?? '-' }}</td>
+                                        <td style="text-align:center">{{ $item->location->loc_mstr_name ?? '-' }}</td>
                                         <td>{{ $item->bpb_mstr_note }}</td>
                                         <td>{{ $item->bpb_mstr_createdat }}</td>
+                                        <td>{{ $item->user->user_mstr_name }}</td>
                                         <td>
                                             <button class="btn btn-sm btn-info" type="button" data-bs-toggle="tooltip"
                                                 data-bs-placement="top" title="Lihat Detail BPB"
