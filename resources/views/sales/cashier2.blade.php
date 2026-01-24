@@ -788,37 +788,71 @@
 
 
     <div class="modal fade" id="holdListModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Transaksi HOLD</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 1.25rem;">
+                <div class="modal-header border-0 pb-0"
+                    style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 1.25rem 1.25rem 0 0;">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-warning bg-opacity-10 p-2 rounded-3 me-3">
+                            <i class="bi bi-pause-btn-fill text-warning fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0">Transaksi Tertunda</h5>
+                            <small class="text-muted">Daftar transaksi yang sedang di-hold</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>No SO</th>
-                                <th>Total</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="holdListBody">
-                            @foreach ($holds as $hold)
+
+                <div class="modal-body p-4">
+                    <div class="table-responsive">
+                        <table class="table align-middle custom-table">
+                            <thead class="bg-light">
                                 <tr>
-                                    <td>{{ $hold->sales_mstr_nbr ? $hold->sales_mstr_nbr : '' }}</td>
-                                    <td>{{ $hold->sales_mstr_grandtotal ? number_format($hold->sales_mstr_grandtotal, 0, ',', '.') : '' }}
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-primary"
-                                            onclick="resumeHold({{ $hold->sales_mstr_id }})">Lanjutkan</button>
-                                        <button class="btn btn-sm btn-danger"
-                                            onclick="cancelHold({{ $hold->sales_mstr_id }})">Batal</button>
-                                    </td>
+                                    <th class="border-0 text-uppercase small fw-bold py-3 ps-4">No. Sales Order</th>
+                                    <th class="border-0 text-uppercase small fw-bold py-3 text-end">Total Nominal</th>
+                                    <th class="border-0 text-uppercase small fw-bold py-3 text-center">Aksi</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody id="holdListBody">
+                                @forelse ($holds as $hold)
+                                    <tr class="hold-row">
+                                        <td class="ps-4">
+                                            <div class="fw-bold text-dark">{{ $hold->sales_mstr_nbr ?? '-' }}</div>
+                                            <small class="text-muted"><i class="bi bi-clock me-1"></i> Menunggu
+                                                Pembayaran</small>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="badge bg-soft-primary text-primary fs-6 fw-bold">
+                                                Rp {{ number_format($hold->sales_mstr_grandtotal, 0, ',', '.') }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <button class="btn btn-sm btn-action btn-primary"
+                                                    onclick="resumeHold({{ $hold->sales_mstr_id }})"
+                                                    title="Lanjutkan">
+                                                    <i class="bi bi-play-fill me-1"></i> Lanjutkan
+                                                </button>
+                                                <button class="btn btn-sm btn-action btn-outline-danger"
+                                                    onclick="cancelHold({{ $hold->sales_mstr_id }})"
+                                                    title="Batalkan">
+                                                    <i class="bi bi-trash3"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="text-center py-5">
+                                            <i class="bi bi-inbox text-muted fs-1 d-block mb-3"></i>
+                                            <span class="text-muted">Tidak ada transaksi yang tertunda.</span>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1073,7 +1107,62 @@
     @endif
 
 
+    <style>
+        /* Custom Styling */
+        .bg-soft-primary {
+            background-color: rgba(13, 110, 253, 0.1);
+        }
 
+        .custom-table {
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        .custom-table thead th {
+            color: #6c757d;
+            background-color: #f8f9fa;
+        }
+
+        .hold-row {
+            transition: all 0.2s ease;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+        }
+
+        .hold-row:hover {
+            background-color: #fbfcfe;
+            transform: scale(1.005);
+        }
+
+        .hold-row td {
+            border-top: 1px solid #f1f1f1 !important;
+            border-bottom: 1px solid #f1f1f1 !important;
+            padding-top: 15px;
+            padding-bottom: 15px;
+        }
+
+        .hold-row td:first-child {
+            border-left: 1px solid #f1f1f1 !important;
+            border-radius: 10px 0 0 10px;
+        }
+
+        .hold-row td:last-child {
+            border-right: 1px solid #f1f1f1 !important;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .btn-action {
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-weight: 600;
+        }
+
+        .modal-dialog-centered {
+            display: flex;
+            align-items: center;
+            min-height: calc(100% - 3.5rem);
+        }
+    </style>
     @push('scripts')
         <script src="{{ asset('assets/js/alert.js') }}"></script>
         <script>
