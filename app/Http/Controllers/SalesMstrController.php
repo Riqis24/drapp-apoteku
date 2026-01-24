@@ -249,6 +249,7 @@ class SalesMstrController extends Controller
         $locId = ($role == 'Kasir') ? 1 : null;
         $history = SalesDet::query()
             ->with([
+                'measurement',
                 'prescription.details.product' => function ($q) use ($locId) {
                     // Ambil stok dan harga terbaru dari product_measurements
                     $q->with(['stocks' => function ($st) use ($locId) {
@@ -262,7 +263,7 @@ class SalesMstrController extends Controller
                 },
                 'prescription.details.product.productMeasurements.measurement', // Untuk ambil nama satuan di PM
                 'prescription.details.product.productMeasurements.price', // Untuk ambil nama satuan di PM
-                'prescription.details.measurement' // Satuan asli saat resep dibuat
+                'prescription.details.measurement', // Satuan asli saat resep dibuat
             ])
             ->where('sales_det_type', 'racikan')
             ->whereHas('prescription', function ($query) use ($search) {
@@ -279,10 +280,12 @@ class SalesMstrController extends Controller
 
             return [
                 'id'   => $item->sales_det_id,
+                'pres_um'   => (string)$item->sales_det_um,
+                'pres_umname'   => $item->measurement->name ?? '-',
                 'pres_name' => ($pres->pres_mstr_name ?? 'Racikan') . " (" . $item->sales_det_createdat->format('d/m/Y') . ")",
                 'customData' => [
                     'nama_racikan' => $pres->pres_mstr_name ?? '-',
-                    'pres_id' => $pres->pres_mstr_id ?? '-',
+                    'pres_id'       => $pres->pres_mstr_id ?? '-',
                     'qty_hasil'    => (float)$pres->pres_mstr_qty ?? 0,
                     'jasa'         => (float)$pres->pres_mstr_fee ?? 0,
                     'markup'       => (float)$pres->pres_mstr_mark ?? 0,

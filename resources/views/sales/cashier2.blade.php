@@ -1088,11 +1088,14 @@
                         url: '/history-racik', // Endpoint yang akan kita buat
                         dataType: 'json',
                         processResults: function(data) {
+                            // console.log(data)
                             return {
                                 results: data.map(function(item) {
                                     return {
                                         id: item.id,
                                         text: item.pres_name,
+                                        um: item.pres_um,
+                                        umname: item.pres_umname,
                                         customData: item.customData // Simpan full data untuk nanti
                                     };
                                 })
@@ -1106,10 +1109,18 @@
 
                     if (selectedData && selectedData.length > 0) {
                         // Ambil customData yang sudah kita kirim dari server
-                        const history = selectedData[0].customData;
-
+                        const item = selectedData[0];
+                        // Objek tambahan yang Anda buat
+                        const history = item.customData;
+                        // console.log(item);
+                        // console.log(history);
                         // 1. Set Info Header
                         $('#namaRacikan').val(history.nama_racikan);
+                        $('#umRacik option').each(function() {
+                            if ($(this).val() == item.um) {
+                                $(this).prop('selected', true);
+                            }
+                        });
                         $('#jumlahHasil').val(history.qty_hasil);
                         $('#jasaRacik').val(history.jasa || 0);
                         $('#markupTambahan').val(history.markup || 0);
@@ -1119,7 +1130,7 @@
 
                         // 3. Inject Bahan Baku
                         if (history.details && history.details.length > 0) {
-                            console.log(history.details);
+                            // console.log(history.details);
                             history.details.forEach(detail => {
                                 // Gunakan fungsi penambah bahan Anda
                                 // Pastikan key-nya (product_id, name, dll) sesuai dengan data history
@@ -1491,26 +1502,6 @@
                     qtyInput.val(parseInt(qtyInput.val()) + 1).trigger('input');
                     return;
                 }
-
-                // if (window.APP_CONFIG.allow_negative == 0) {
-                //     // Cek setiap item di keranjang
-                //     // Pastikan qty dan stock di-convert ke angka agar perbandingan valid
-                //     const stock = parseFloat(item.stock) || 0;
-                //     const conversion = parseFloat(item.conversion) || 0;
-
-                //     if (conversion > stock) {
-                //         // Hitung selisihnya dulu
-                //         const kurangnya = conversion - stock;
-
-                //         swalError(
-                //             "Stok Tidak Cukup",
-                //             "Item berikut melebihi stok: " + (item.product || "Produk") +
-                //             ". Stock tersisa " + stock +
-                //             ". Kurang " + kurangnya // Menggunakan variabel yang sudah dihitung
-                //         );
-                //         return;
-                //     }
-                // };
 
                 const row = `
         <tr id="${rowId}" data-product-id="${item.product_id}">
