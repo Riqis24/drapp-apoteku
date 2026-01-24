@@ -202,7 +202,7 @@
                                                             <td class="ps-4">
                                                                 <span
                                                                     class="badge rounded-pill bg-info-subtle text-info px-3 py-2 fw-bold text-uppercase view-mode">
-                                                                    {{ $pm->placement->description }}
+                                                                    {{ $pm->placement->description ?? '-' }}
                                                                 </span>
                                                                 <select
                                                                     class="form-select form-select-sm edit-mode d-none placement-input">

@@ -866,43 +866,21 @@
                 </div>
                 <!-- Body -->
                 <div class="modal-body">
-                    <div class="p-3 mb-4 rounded-3" style="background: #f0f7ff; border: 1px dashed #adc7fd;">
-                        <div class="row align-items-end g-2">
-                            <div class="col-md-9">
-                                <label class="pos-label-mini mb-1 text-primary">
-                                    <i class="bi bi-clock-history"></i> Copy dari Racikan Sebelumnya (History)
-                                </label>
-                                <select id="copyHistoryRacik" class="form-select border-2 shadow-none"
-                                    style="border-radius: 10px;">
-                                    <option value="">-- Cari Nama Racikan / Resep Lama --</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <button type="button" class="btn btn-primary w-100 fw-bold shadow-sm"
-                                    id="btnApplyCopy" style="height: 40px; border-radius: 10px;">
-                                    <i class="bi bi-clipboard-check"></i> Gunakan
-                                </button>
-                            </div>
-                        </div>
-                        <div class="mt-2">
-                            <small class="text-muted" style="font-size: 11px;">
-                                *Menampilkan 20 racikan terakhir yang pernah dibuat.
-                            </small>
-                        </div>
-                    </div>
 
+                    <!-- Nama Racikan -->
                     <div class="row mb-3">
                         <div class="col-md-8">
-                            <label class="pos-label-mini mb-1">Nama Racikan Baru</label>
-                            <input type="text" id="namaRacikan" class="form-control border-2 fw-bold"
-                                placeholder="Cth: Puyer Batuk Anak..." style="border-radius: 10px; height: 45px;">
+                            <label class="form-label fw-bold">Nama Racikan</label>
+                            <input type="text" id="namaRacikan" class="form-control"
+                                placeholder="Cth: Puyer Batuk Pilek Anak">
                         </div>
                         <div class="col-md-4">
-                            <label class="pos-label-mini mb-1">Jumlah Hasil (Bungkus/Kapsul)</label>
+                            <label class="form-label fw-bold">
+                                Jumlah Hasil
+                            </label>
                             <div class="input-group">
-                                <input type="number" id="jumlahHasil"
-                                    class="form-control border-2 text-center fw-bold" value="10"
-                                    style="border-radius: 10px 0 0 10px; height: 45px;">
+                                <input type="number" id="jumlahHasil" class="form-control text-end" value="10">
+
                                 <select name="umRacik" id="umRacik" class="form-select" style="max-width: 150px;">
                                     <option value="">--satuan--</option>
                                     @foreach ($ums as $um)
@@ -1076,110 +1054,6 @@
 
     @push('scripts')
         <script src="{{ asset('assets/js/alert.js') }}"></script>
-        <script>
-            $(document).ready(function() {
-                // 1. Inisialisasi Select2 untuk cari history racikan
-                $('#copyHistoryRacik').select2({
-                    dropdownParent: $('#modalRacik'), // Agar dropdown muncul di atas modal
-                    placeholder: 'Cari riwayat racikan (Nama atau No. Resep)...',
-                    theme: "bootstrap-5",
-                    allowClear: true,
-                    ajax: {
-                        url: '/history-racik', // Endpoint yang akan kita buat
-                        dataType: 'json',
-                        processResults: function(data) {
-                            return {
-                                results: data.map(function(item) {
-                                    return {
-                                        id: item.id,
-                                        text: item.pres_name,
-                                        customData: item.customData // Simpan full data untuk nanti
-                                    };
-                                })
-                            };
-                        }
-                    }
-                });
-                // 2. Event saat tombol "Gunakan" diklik
-                $('#btnApplyCopy').on('click', function() {
-                    const selectedData = $('#copyHistoryRacik').select2('data');
-
-                    if (selectedData && selectedData.length > 0) {
-                        // Ambil customData yang sudah kita kirim dari server
-                        const history = selectedData[0].customData;
-
-                        // 1. Set Info Header
-                        $('#namaRacikan').val(history.nama_racikan);
-                        $('#jumlahHasil').val(history.qty_hasil);
-                        $('#jasaRacik').val(history.jasa || 0);
-                        $('#markupTambahan').val(history.markup || 0);
-
-                        // 2. Kosongkan Tabel
-                        $('#racikTableBody').empty();
-
-                        // 3. Inject Bahan Baku
-                        if (history.details && history.details.length > 0) {
-                            console.log(history.details);
-                            history.details.forEach(detail => {
-                                // Gunakan fungsi penambah bahan Anda
-                                // Pastikan key-nya (product_id, name, dll) sesuai dengan data history
-                                addBahanRacik({
-                                    id: detail.id,
-                                    product_id: detail.product_id,
-                                    text: detail
-                                        .text, // Pastikan di server dikirim 'product_name'
-                                    qty: detail.qty_needed,
-                                    measurement: detail.measurement,
-                                    measurement_id: detail.measurement_id,
-                                    price: detail.price,
-                                    batch_number: detail.batch_number,
-                                    stock: detail.stock ||
-                                        0 // Jika history menyimpan info stok terakhir
-                                });
-                            });
-                        }
-
-                        // 4. Hitung Ulang Total
-                        // Pastikan fungsi ini dipanggil agar "Harga Jual Total" di kanan bawah update
-                        // hitungTotalHargaRacikan();
-
-                        $('#modalHistory').modal('hide');
-                    }
-                });
-            });
-
-            function fillRacikanFromHistory(history) {
-                // A. Set Info Utama
-                $('#namaRacikan').val(history.nama_racikan + " (Copy)");
-                $('#jumlahHasil').val(history.qty_hasil);
-
-                // B. Kosongkan Tabel Bahan Baku saat ini
-                const tableBody = document.getElementById('racikTableBody');
-                tableBody.innerHTML = ''; // Hapus pesan "Belum ada bahan"
-
-                // C. Iterasi Bahan Baku dari History
-                history.details.forEach(item => {
-                    // Buat Baris Baru (Gunakan fungsi add item racik Anda)
-                    // Disini saya asumsikan fungsi Anda bernama 'addBahanToRacik'
-                    addBahanRacik({
-                        id: item.product_id,
-                        text: item.text,
-                        measurement: item.measurement,
-                        measurement_id: item.measurement_id,
-                        stock: item.stock,
-                        price: item.price, // Gunakan harga saat ini atau harga history
-                        qty: item.qty,
-                        batch_number: item.batch_number
-                    });
-                });
-
-                // D. Hitung Ulang Total Harga Racikan
-                hitungTotalRacik();
-
-                // Beri efek visual agar kasir tahu data sudah berubah
-                $('#racikTableBody').fadeOut(100).fadeIn(100);
-            }
-        </script>
         <script>
             $(document).ready(function() {
                 // Cek variabel dari Laravel

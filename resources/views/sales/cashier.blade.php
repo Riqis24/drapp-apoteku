@@ -845,8 +845,8 @@
                                 results: data.map(function(item) {
                                     return {
                                         id: item.id,
-                                        text: item.nama_racikan + ' (' + item.created_at + ')',
-                                        customData: item // Simpan full data untuk nanti
+                                        text: item.pres_name,
+                                        customData: item.customData // Simpan full data untuk nanti
                                     };
                                 })
                             };
@@ -858,21 +858,44 @@
                     const selectedData = $('#copyHistoryRacik').select2('data');
 
                     if (selectedData && selectedData.length > 0) {
+                        // Ambil customData yang sudah kita kirim dari server
                         const history = selectedData[0].customData;
 
-                        // 1. Set Info Utama
+                        // 1. Set Info Header
                         $('#namaRacikan').val(history.nama_racikan);
                         $('#jumlahHasil').val(history.qty_hasil);
+                        $('#jasaRacik').val(history.jasa || 0);
+                        $('#markupTambahan').val(history.markup || 0);
 
-                        // 2. Kosongkan tabel sebelum inject history
+                        // 2. Kosongkan Tabel
                         $('#racikTableBody').empty();
 
-                        // 3. Masukkan bahan-bahan dari history ke tabel menggunakan fungsi Anda
-                        history.details.forEach(detail => {
-                            addBahanRacik(detail);
-                        });
+                        // 3. Inject Bahan Baku
+                        if (history.details && history.details.length > 0) {
+                            console.log(history.details);
+                            history.details.forEach(detail => {
+                                // Gunakan fungsi penambah bahan Anda
+                                // Pastikan key-nya (product_id, name, dll) sesuai dengan data history
+                                addBahanRacik({
+                                    id: detail.id,
+                                    product_id: detail.product_id,
+                                    text: detail
+                                        .text, // Pastikan di server dikirim 'product_name'
+                                    qty: detail.qty_needed,
+                                    measurement: detail.measurement,
+                                    measurement_id: detail.measurement_id,
+                                    price: detail.price,
+                                    stock: detail.stock ||
+                                        0 // Jika history menyimpan info stok terakhir
+                                });
+                            });
+                        }
 
-                        alert('Data racikan berhasil dimuat!');
+                        // 4. Hitung Ulang Total
+                        // Pastikan fungsi ini dipanggil agar "Harga Jual Total" di kanan bawah update
+                        // hitungTotalHargaRacikan();
+
+                        $('#modalHistory').modal('hide');
                     }
                 });
             });
@@ -892,11 +915,13 @@
                     // Disini saya asumsikan fungsi Anda bernama 'addBahanToRacik'
                     addBahanRacik({
                         id: item.product_id,
-                        name: item.product_name,
-                        measurement: item.unit_name,
-                        stock: item.current_stock,
-                        price: item.price_at_time, // Gunakan harga saat ini atau harga history
-                        qty: item.qty_needed
+                        text: item.text,
+                        measurement: item.measurement,
+                        measurement_id: item.measurement_id,
+                        stock: item.stock,
+                        price: item.price, // Gunakan harga saat ini atau harga history
+                        qty: item.qty,
+                        batch_number: item.batch_number
                     });
                 });
 
