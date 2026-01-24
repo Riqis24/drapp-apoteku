@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\storeProfile;
+use App\Models\StoreProfile;
 use Illuminate\Http\Request;
 use App\Http\Requests\StorestoreProfileRequest;
 use App\Http\Requests\UpdatestoreProfileRequest;
