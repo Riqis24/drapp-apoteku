@@ -169,29 +169,29 @@ class SalesMstrController extends Controller
                     // $groupKey = "prod-{$product->id}-loc-{$stock->loc_id}"; //penentu groupby
                     $groupKey = "prod-{$product->id}-pm-{$p->id}-loc-{$stock->loc_id}"; //penentu groupby
 
-                    if ($stock->quantity > 0) {
-                        // Gunakan put agar jika key sama, tidak akan menambah baris baru (grouping)
-                        if (!$items->has($groupKey)) {
-                            $items->put($groupKey, [
-                                'id'                     => $p->id,
-                                'type'                   => 'single',
-                                'text'                   => "{$product->name} (" . ($p->measurement->name ?? '-') . ") - " . ($p->placement->name ?? '-'),
-                                'price'                  => $p->price->price ?? 0,
-                                'loc_id'                 => $stock->loc->loc_mstr_id,
-                                'product_id'             => $product->id,
-                                'product'                => $product->name,
-                                'rak'                    => $p->placement->name ?? '-',
-                                'product_measurement_id' => $p->id,
-                                'conversion' => $p->conversion,
-                                'measurement_id'         => $p->measurement_id,
-                                'measurement'            => $p->measurement->name ?? '-',
-                                // Batch ini adalah batch pertama yang ditemukan di lokasi tersebut
-                                'batch_number'           => $stock->batch->batch_mstr_no ?? '-',
-                                'batch_exp'              => $stock->batch->batch_mstr_expireddate ?? '-',
-                                'stock'                  => $sumstock
-                            ]);
-                        }
+                    // if ($stock->quantity > 0) {
+                    // Gunakan put agar jika key sama, tidak akan menambah baris baru (grouping)
+                    if (!$items->has($groupKey)) {
+                        $items->put($groupKey, [
+                            'id'                     => $p->id,
+                            'type'                   => 'single',
+                            'text'                   => "{$product->name} (" . ($p->measurement->name ?? '-') . ") - " . ($p->placement->name ?? '-'),
+                            'price'                  => $p->price->price ?? 0,
+                            'loc_id'                 => $stock->loc->loc_mstr_id,
+                            'product_id'             => $product->id,
+                            'product'                => $product->name,
+                            'rak'                    => $p->placement->name ?? '-',
+                            'product_measurement_id' => $p->id,
+                            'conversion' => $p->conversion,
+                            'measurement_id'         => $p->measurement_id,
+                            'measurement'            => $p->measurement->name ?? '-',
+                            // Batch ini adalah batch pertama yang ditemukan di lokasi tersebut
+                            'batch_number'           => $stock->batch->batch_mstr_no ?? '-',
+                            'batch_exp'              => $stock->batch->batch_mstr_expireddate ?? '-',
+                            'stock'                  => $sumstock
+                        ]);
                     }
+                    // }
                 }
             }
 
@@ -315,25 +315,56 @@ class SalesMstrController extends Controller
                 $pres = PresMstr::with('details.product', 'details.measurement')->find($det->sales_det_pmid);
                 if ($pres) {
 
-                    // Coba ambil detail secara manual jika relasi bermasalah
-                    $bahanRacikan = PresDet::with(['product', 'measurement'])
-                        ->where('pres_det_mstrid', $pres->pres_mstr_id) // Sesuaikan nama kolom ID-nya
-                        ->get();
+                    // JIKA RACIKAN
+                    if (!empty($det->sales_det_pmid)) {
+                        $pres = PresMstr::with('details.product', 'details.measurement')->find($det->sales_det_pmid);
 
-                    if ($bahanRacikan->isNotEmpty()) {
-                        dd('masuk 23');
-
+                        // Definisikan ID Unik di luar agar selalu tersedia
                         $idUnik = $det->sales_det_prescode;
-                        // dd($idUnik);
-                        $racikanDetails[$idUnik] = $bahanRacikan->map(function ($d) {
-                            return [
-                                'product_id'       => $d->pres_det_productid,
-                                'product_name'     => $d->product->name ?? 'N/A',
-                                'qty'              => (float)$d->pres_det_qty,
-                                'measurement_id'   => $d->pres_det_um,
-                                'measurement_name' => $d->measurement->name ?? '-',
+
+                        if ($pres) {
+                            $bahanRacikan = PresDet::with(['product', 'measurement'])
+                                ->where('pres_det_mstrid', $pres->pres_mstr_id)
+                                ->get();
+
+                            // dd($bahanRacikan);
+
+                            $idUnik = $det->sales_det_prescode;
+
+                            // SESUAIKAN DENGAN STRUKTUR simpanDetailRacikan
+                            $racikanDetails[$idUnik] = [
+                                'nama'           => $pres->pres_mstr_name,
+                                'jumlah_bungkus' => (int)$det->sales_det_qty, // atau field yang sesuai di DB
+                                'jasa'           => $pres->pres_mstr_fee, // sesuaikan jika ada di DB
+                                'markup'         => $pres->pres_mstr_mark, // sesuaikan jika ada di DB
+                                'total'          => (int)$det->sales_det_price * $det->sales_det_qty,
+                                'details'        => $bahanRacikan->map(function ($d) {
+                                    return [
+                                        'product_id'       => $d->pres_det_productid,
+                                        'product_name'     => $d->product->name ?? 'N/A', // Untuk label
+                                        'qty'              => (float)$d->pres_det_qty,
+                                        'price'            => (int)$d->pres_det_price, // Pastikan ini ada
+                                        'measurement_id'   => $d->pres_det_um,
+                                        'measurement_name' => $d->measurement->name ?? '-',
+                                    ];
+                                })->toArray()
                             ];
-                        })->toArray();
+                        }
+
+                        return [
+                            'prescode'       => $det->sales_det_prescode,
+                            'product_id'     => 0,
+                            'measurement_id' => $det->sales_det_um,
+                            'qty'            => $det->sales_det_qty,
+                            'price'          => (float)$det->sales_det_price,
+                            'disc'           => $det->sales_det_discamt,
+                            'product'        => $pres->pres_mstr_name ?? 'Resep Tidak Ditemukan',
+                            'measurement'    => $um->name ?? '-',
+                            'type'           => 'racikan',
+                            'batch_number'   => 'Resep',
+                            'batch_exp'      => '-',
+                            'id_unik'        => $idUnik // Pastikan ini terkirim ke JS
+                        ];
                     } else {
                         // Log jika ternyata memang kosong di DB
                         Log::warning("Bahan racikan kosong di database untuk Master ID: " . $pres->pres_mstr_id);
@@ -774,9 +805,13 @@ class SalesMstrController extends Controller
         $isAlreadyReduced = ($oldStatus === 'draft');
 
         $prescription = PresMstr::updateOrCreate(
-            ['pres_mstr_smid' => $sales->sales_mstr_id, 'pres_mstr_name' => $dataRacik['nama']],
             [
-                'pres_mstr_code'      => 'RCK-' . ($prescription->pres_mstr_code ?? time()), // Pertahankan kode lama jika update
+                // Gunakan ID Unik (misal: RCK-1769222356) sebagai kunci pencarian utama
+                'pres_mstr_code' => $idUnik
+            ],
+            [
+                'pres_mstr_smid'      => $sales->sales_mstr_id,
+                'pres_mstr_name'      => $dataRacik['nama'], // Nama boleh berubah, yang penting kodenya tetap
                 'pres_mstr_doctor'    => $request->doctor_name ?? 'Umum',
                 'pres_mstr_type'      => 'prescription',
                 'pres_mstr_qty'       => $dataRacik['jumlah_bungkus'],
@@ -789,40 +824,35 @@ class SalesMstrController extends Controller
             ]
         );
 
+        $prescription->details()->delete();
+
         // dd($dataRacik['details']);
 
 
         // 2. LOOP BAHAN BAKU
-        if (!$isAlreadyReduced) {
-            foreach ($dataRacik['details'] as $bahan) {
-                $pm = ProductMeasurements::where('product_id', $bahan['product_id'])
-                    ->where('measurement_id', $bahan['measurement_id'])
-                    ->firstOrFail();
+        foreach ($dataRacik['details'] as $bahan) {
+            $pm = ProductMeasurements::where('product_id', $bahan['product_id'])
+                ->where('measurement_id', $bahan['measurement_id'])
+                ->first();
 
-                $conversion = (float) $pm->conversion;
-                $qtyBase    = (float) $bahan['qty'] * $conversion;
-                // dd($qtyBase);
-                // FIFO
-                $appliedBatches = $this->processStockOutFIFO(
-                    $bahan['product_id'],
-                    $request->loc_id,
-                    $qtyBase,
-                    $sales->sales_mstr_id
-                );
+            $conversion = $pm ? (float)$pm->conversion : 1;
 
-                // dd($appliedBatches);
+            // Potong stok via FIFO
+            $appliedBatches = $this->processStockOutFIFO(
+                $bahan['product_id'],
+                $request->loc_id,
+                ($bahan['qty'] * $conversion),
+                $sales->sales_mstr_id
+            );
 
-                // Simpan Detail Resep (Bisa banyak baris jika pecah batch)
-                foreach ($appliedBatches as $ab) {
-                    $prescription->details()->create([
-                        'pres_det_mstrid' => $prescription->pres_mstr_id,
-                        'pres_det_productid' => $bahan['product_id'],
-                        'pres_det_um'        => $bahan['measurement_id'],
-                        'pres_det_batchid'   => $ab['batch_id'],
-                        'pres_det_qty'       => $ab['qty'] / $conversion, // Kembalikan ke satuan yang dipilih
-                        'pres_det_price'     => $bahan['price'],
-                    ]);
-                }
+            foreach ($appliedBatches as $ab) {
+                $prescription->details()->create([
+                    'pres_det_productid' => $bahan['product_id'],
+                    'pres_det_um'        => $bahan['measurement_id'],
+                    'pres_det_batchid'   => $ab['batch_id'],
+                    'pres_det_qty'       => $ab['qty'] / $conversion,
+                    'pres_det_price'     => $bahan['price'],
+                ]);
             }
         }
 

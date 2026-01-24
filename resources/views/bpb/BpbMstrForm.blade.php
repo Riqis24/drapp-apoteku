@@ -506,6 +506,8 @@
                     $('#suppid').val('');
                     $('#suppname').val('').removeClass('bg-light');
                 }
+                calculateBpbSummary();
+
             });
             let rowIndex = 0;
 
@@ -620,7 +622,7 @@
                     });
 
                     calculateLineTotals(); // Hitung ulang total setelah semua row masuk
-
+                    calculateBpbSummary();
                     // Fokuskan ke Qty baris pertama agar user bisa langsung input
                     focusRow($('#bpbTable tbody tr:first'));
                 });
