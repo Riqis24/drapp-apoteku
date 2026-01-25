@@ -14,12 +14,24 @@ class CustomerSeeder extends Seeder
     public function run(): void
     {
         Customer::create([
-            'name' => 'Customer Umum',
-            'phone' => null,
-            'address' => null,
+            'name' => 'Umum',
+            'phone' => '-',
+            'address' => '-',
+            'total_outstanding' => 0,
+            'isvisible' => 1,
+            'type' => 'Reguler'
         ]);
 
-        Customer::factory()->count(100)->create(); // generate 10 data customer
+        Customer::create([
+            'name' => 'Riqi Saputra',
+            'phone' => '088135749642',
+            'address' => 'Jl. Merdeka No. 123',
+            'total_outstanding' => 0,
+            'isvisible' => 0,
+            'type' => 'Member'
+        ]);
+
+        // Customer::factory()->count(100)->create(); // generate 10 data customer
 
 
     }

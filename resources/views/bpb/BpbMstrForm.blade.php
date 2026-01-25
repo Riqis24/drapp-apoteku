@@ -532,6 +532,8 @@
                     let supplierName = response.supplier_name;
                     let items = response.items;
 
+                    // console.log(items);
+
                     // ISI DATA SUPPLIER
                     if ($('#suppid').is('select')) {
                         $('#suppid').val(supplierId).trigger('change').attr('readonly', true);
@@ -606,7 +608,7 @@
                     <td data-label="Update" class="text-center">
                         <input type="hidden" name="items[${rowIndex}][margin]" value="${item.product.margin}">
                         <div class="form-check form-switch d-inline-block">
-                            <input class="form-check-input chk-update-price" type="checkbox" name="items[${rowIndex}][updateprice]" value="1">
+                            <input class="form-check-input chk-update-price" onclick="handleUpdatePriceCheckbox(this, '${item.product.id}', '${item.um.id}')" type="checkbox" name="items[${rowIndex}][updateprice]" value="1">
                         </div>
                     </td>
                     
@@ -828,6 +830,8 @@
             }
 
             function handleUpdatePriceCheckbox(chk, productId, measurementId) {
+                console.log('masuk handleUpdatePriceCheckbox');
+
                 if ($(chk).is(':checked')) {
                     let row = $(chk).closest('tr');
                     // Ambil harga dari input bpb-price-input (yang sebelumnya kita set readonly)
@@ -838,7 +842,6 @@
                         $(chk).prop('checked', false);
                         return;
                     }
-
                     openUpdatePriceModal(productId, bpbPrice, measurementId);
                 }
             }

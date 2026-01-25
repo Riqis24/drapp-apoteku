@@ -6,7 +6,7 @@
             </a>
         </header>
         <div class="page-heading">
-            <h3>invoice Penjualan</h3>
+            <h3>Invoice Penjualan</h3>
         </div>
         <div class="page-content">
             <div class="card">
@@ -33,7 +33,7 @@
                             <tbody>
                                 @foreach ($transactions as $transaction)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
+                                        <td style="text-align: right">{{ $loop->iteration }}</td>
                                         <td>{{ $transaction->sales_mstr_createdat }}</td>
                                         <td>{{ $transaction->sales_mstr_nbr }}</td>
                                         <td>{{ $transaction->loc->loc_mstr_name }}</td>
@@ -68,7 +68,6 @@
                                                 </form>
                                             @endrole
                                         </td>
-
                                     </tr>
                                 @endforeach
                             </tbody>

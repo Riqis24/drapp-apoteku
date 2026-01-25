@@ -30,10 +30,18 @@ class DatabaseSeeder extends Seeder
             ProductPlacementSeeder::class,
             ProductMeasurementsSeeder::class,
             ProductCatSeeder::class,
+            CustomerSeeder::class,
         ]);
         User::create([
             'user_mstr_name' => 'Riqi Saputra',
             'user_mstr_email' => 'riqi@mail.com',
+            'email_verified_at' => now(),
+            'user_mstr_password' => 'password',
+            'remember_token' => Str::random(10),
+        ]);
+        User::create([
+            'user_mstr_name' => 'Akhmad',
+            'user_mstr_email' => 'akhmad@mail.com',
             'email_verified_at' => now(),
             'user_mstr_password' => 'password',
             'remember_token' => Str::random(10),

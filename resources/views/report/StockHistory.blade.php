@@ -77,7 +77,6 @@
                                                 \App\Models\TsMstr::class => $st->source?->ts_mstr_nbr,
                                                 default => '-',
                                             } ?? '-';
-
                                         $route =
                                             match ($st->source_type) {
                                                 \App\Models\SalesMstr::class => 'SalesMstr.show',
