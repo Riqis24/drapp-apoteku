@@ -14,13 +14,13 @@
                     <div class="col-md-4 mb-3 mb-md-0">
                         <small class="text-muted">Bukti Penerimaan Barang</small>
                         <h5 class="fw-bold text-primary mt-1">
-                            {{ $bpb->bpb_mstr_nbr }}
+                            {{ $bpb->bpb_mstr_nbr ?? '-' }}
                         </h5>
                     </div>
                     <div class="col-md-4 mb-3 mb-md-0">
                         <small class="text-muted">PO</small>
                         <h5 class="fw-bold text-info mt-1">
-                            {{ $bpb->po->po_mstr_nbr }}
+                            {{ $bpb->po->po_mstr_nbr ?? '-' }}
                         </h5>
                     </div>
                     <div class="col-md-4 mb-3 mb-md-0">
@@ -57,7 +57,7 @@
                                         <td style="text-align:right;">{{ $loop->iteration }}</td>
                                         <td>{{ $detail->product->name }}</td>
                                         <td style="text-align:right;">{{ numfmt($detail->bpb_det_qty) }}</td>
-                                        <td style="text-align:center;">{{ $detail->podet->um->name }}</td>
+                                        <td style="text-align:center;">{{ $detail->measurement->name ?? '-' }}</td>
                                         <td style="text-align:right;">{{ rupiah($detail->bpb_det_price) }}</td>
                                         <td>{{ $detail->batch->batch_mstr_no }}</td>
                                         <td>{{ $detail->bpb_det_expired }}</td>

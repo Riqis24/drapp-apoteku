@@ -27,7 +27,6 @@
                                     <th>Dari</th>
                                     <th>Ke</th>
                                     <th>Status</th>
-                                    <th></th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>

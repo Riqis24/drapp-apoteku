@@ -819,6 +819,26 @@
                                     <tr class="hold-row">
                                         <td class="ps-4">
                                             <div class="fw-bold text-dark">{{ $hold->sales_mstr_nbr ?? '-' }}</div>
+                                            <div class="mt-2 d-flex flex-wrap gap-1">
+                                                @foreach ($hold->details as $detail)
+                                                    @if ($detail->sales_det_type == 'racikan' || !$detail->product->id)
+                                                        <span
+                                                            class="badge bg-soft-warning text-warning border border-warning"
+                                                            style="font-size: 0.75rem;">
+                                                            <i class="bi bi-capsule-pill me-1"></i>
+                                                            {{ $detail->prescription->pres_mstr_name ?? 'Racikan' }}
+                                                            <small>x{{ number_format($detail->sales_det_qty, 0) }}</small>
+                                                        </span>
+                                                    @else
+                                                        <span class="badge bg-light text-secondary border"
+                                                            style="font-size: 0.75rem; font-weight: 500;">
+                                                            {{ $detail->product->name ?? 'Unknown' }}
+                                                            <small
+                                                                class="text-primary">x{{ number_format($detail->sales_det_qty, 0) }}</small>
+                                                        </span>
+                                                    @endif
+                                                @endforeach
+                                            </div>
                                             <small class="text-muted"><i class="bi bi-clock me-1"></i> Menunggu
                                                 Pembayaran</small>
                                         </td>

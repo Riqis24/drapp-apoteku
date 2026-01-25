@@ -16,9 +16,9 @@ return new class extends Migration
             $table->id('pr_mstr_id');
 
             $table->string('pr_mstr_nbr')->nullable();
-            $table->unsignedBigInteger('pr_mstr_poid');
-            $table->unsignedBigInteger('pr_mstr_bpbid');
-            $table->unsignedBigInteger('pr_mstr_suppid');
+            $table->unsignedBigInteger('pr_mstr_poid')->nullable();
+            $table->unsignedBigInteger('pr_mstr_bpbid')->nullable();
+            $table->unsignedBigInteger('pr_mstr_suppid')->nullable();
             $table->date('pr_mstr_date')->nullable();
             $table->text('pr_mstr_reason')->nullable();
 

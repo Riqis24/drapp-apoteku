@@ -50,6 +50,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::resource('UserMstr', UserController::class);
+
+
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
@@ -61,8 +64,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::resource('UserMstr', UserController::class);
     Route::put('/UserMstr/{id}/update-inline', [UserController::class, 'updateInline'])->name('UserMstr.updateInline');
+    Route::resource('UserMstr', UserController::class);
 
     Route::resource('RoleMstr', RoleController::class);
     Route::get('RoleMstr/{idRole}/assignRole', [RoleController::class, 'assignRole'])->name('RoleMstr.assignRole');
@@ -167,7 +170,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/sales/hold/{id}/cancel', [SalesMstrController::class, 'cancelHold']);
     Route::get('/history-racik', [SalesMstrController::class, 'getHistoryRacik']);
     Route::resource('SrMstr', SrMstrController::class);
-    Route::get('SrMstr/{id}/create', [SrMstrController::class, 'create'])->name('SrMstr.create');
+    Route::get('SrMstr/{id}/create', [SrMstrController::class, 'create'])->name('SrMstr.createe');
 
     Route::get('PrMstr/', [PrMstrController::class, 'index'])->name('PrMstr.index');
     Route::get('PrMstr/create/{id}', [PrMstrController::class, 'create'])->name('PrMstr.create');

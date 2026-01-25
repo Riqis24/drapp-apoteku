@@ -52,7 +52,7 @@
                                                 <i class="bi bi-folder"></i>
                                             </button>
                                             <button type="button" class="btn btn-sm btn-warning rounded"
-                                                onclick="window.location.href='{{ route('SrMstr.create', $transaction->sales_mstr_id) }}'">
+                                                onclick="window.location.href='{{ route('SrMstr.createe', $transaction->sales_mstr_id) }}'">
                                                 <i class="bi bi-cart-dash"></i>
                                             </button>
                                             @role(['Super Admin'])

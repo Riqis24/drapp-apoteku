@@ -147,7 +147,7 @@
     </table>
 
     <div class="divider"></div>
-    <p class="text-center" style="font-size: 8pt;">{{ $apotek->footer_note }}</p>
+    <p class="text-center" style="font-size: 8pt;">{{ $apotek->footer_note ?? '-' }}</p>
 
     {{-- Script Otomatis Cetak --}}
     <script>

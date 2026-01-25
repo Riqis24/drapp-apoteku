@@ -31,13 +31,13 @@
                             @foreach ($returns as $item)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $item->pr_mstr_nbr }}</td>
-                                    <td>{{ $item->pr_mstr_date }}</td>
-                                    <td>{{ $item->po->po_mstr_nbr }}</td>
-                                    <td>{{ $item->bpb->bpb_mstr_nbr }}</td>
-                                    <td>{{ $item->bpb->bpb_mstr_nofaktur }}</td>
-                                    <td>{{ $item->pr_mstr_reason }}</td>
-                                    <td>{{ $item->creator->user_mstr_name }}</td>
+                                    <td>{{ $item->pr_mstr_nbr ?? '-' }}</td>
+                                    <td>{{ $item->pr_mstr_date ?? '-' }}</td>
+                                    <td>{{ $item->po->po_mstr_nbr ?? '-' }}</td>
+                                    <td>{{ $item->bpb->bpb_mstr_nbr ?? '-' }}</td>
+                                    <td>{{ $item->bpb->bpb_mstr_nofaktur ?? '-' }}</td>
+                                    <td>{{ $item->pr_mstr_reason ?? '-' }}</td>
+                                    <td>{{ $item->creator->user_mstr_name ?? '-' }}</td>
                                     <td>
                                         <button class="btn btn-sm btn-info" type="button"
                                             onclick="window.open('{{ route('PrMstr.show', $item->pr_mstr_id) }}')">

@@ -12,7 +12,7 @@
             <div class="card-body px-5 py-4">
                 <div class="text-center">
                     <small class="text-muted">No. Faktur</small>
-                    <h5 class="fw-bold text-dark mb-0">{{ $pr->bpb->bpb_mstr_nofaktur }}
+                    <h5 class="fw-bold text-dark mb-0">{{ $pr->bpb->bpb_mstr_nofaktur ?? '-' }}
 
                     </h5>
                 </div>
@@ -20,19 +20,19 @@
                     <div class="col-md-4 mb-3 mb-md-0">
                         <small class="text-muted">Nama Supplier</small>
                         <h5 class="fw-bold text-primary mt-1">
-                            {{ $pr->bpb->supplier->supp_mstr_name }}
+                            {{ $pr->bpb->supplier->supp_mstr_name ?? '-' }}
                         </h5>
                     </div>
                     <div class="col-md-4 mb-3 mb-md-0">
                         <small class="text-muted">PO</small>
                         <h5 class="fw-bold text-info mt-1">
-                            {{ $pr->po->po_mstr_nbr }}
+                            {{ $pr->po->po_mstr_nbr ?? '-' }}
                         </h5>
                     </div>
                     <div class="col-md-4 mb-3 mb-md-0">
                         <small class="text-muted">Penerimaan</small>
                         <h5 class="fw-bold text-warning mt-1">
-                            {{ $pr->bpb->bpb_mstr_nbr }}
+                            {{ $pr->bpb->bpb_mstr_nbr ?? '-' }}
                         </h5>
                     </div>
                 </div>
@@ -61,7 +61,7 @@
                                 @foreach ($pr->details as $detail)
                                     <tr>
                                         <td style="text-align:right;">{{ $loop->iteration }}</td>
-                                        <td>{{ $detail->product->name }}</td>
+                                        <td>{{ $detail->product->name ?? '-' }}</td>
                                         <td style="text-align:right;">{{ numfmt($detail->pr_det_qty) }}</td>
                                         <td style="text-align:right;">{{ $detail->measurement->name }}</td>
                                         <td style="text-align:right;">{{ rupiah($detail->pr_det_price) }}</td>

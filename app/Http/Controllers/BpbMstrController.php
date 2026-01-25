@@ -634,7 +634,7 @@ class BpbMstrController extends Controller
     public function show($id)
     {
         $bpb = BpbMstr::with(['supplier', 'po', 'batch'])->findOrFail($id);
-        $details = BpbDet::with(['product', 'podet.um'])
+        $details = BpbDet::with(['product', 'measurement', 'podet.um'])
             ->where('bpb_det_mstrid', $id)
             ->get();
         return view('bpb.BpbDetList', compact('bpb', 'details'));

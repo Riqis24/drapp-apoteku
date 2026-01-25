@@ -327,7 +327,7 @@ class SalesMstrController extends Controller
 
     public function listHold()
     {
-        $holds = SalesMstr::where('sales_mstr_status', 'draft')->get();
+        $holds = SalesMstr::with(['details.product', 'details.prescription'])->where('sales_mstr_status', 'draft')->get();
         return response()->json($holds);
     }
 
@@ -587,7 +587,6 @@ class SalesMstrController extends Controller
                     'source_id'   => $sales->sales_mstr_id,
                     'date'        => now(),
                     'created_by' => auth()->user()->user_mstr_id,
-
                 ]);
 
                 // ppn
@@ -866,23 +865,46 @@ class SalesMstrController extends Controller
                 ->first();
 
             $conversion = $pm ? (float)$pm->conversion : 1;
+            $totalQtyBase = $bahan['qty'] * $conversion;
 
-            // Potong stok via FIFO
-            $appliedBatches = $this->processStockOutFIFO(
-                $bahan['product_id'],
-                $request->loc_id,
-                ($bahan['qty'] * $conversion),
-                $sales->sales_mstr_id
-            );
+            // dd($totalQtyBase);
 
-            foreach ($appliedBatches as $ab) {
-                $prescription->details()->create([
-                    'pres_det_productid' => $bahan['product_id'],
-                    'pres_det_um'        => $bahan['measurement_id'],
-                    'pres_det_batchid'   => $ab['batch_id'],
-                    'pres_det_qty'       => $ab['qty'] / $conversion,
-                    'pres_det_price'     => $bahan['price'],
-                ]);
+            // --- LOGIKA POTONG STOK (Hanya jika bayar) ---
+            $appliedBatches = [];
+
+            // Cek apakah request ini bertujuan untuk menyelesaikan pembayaran
+            if ($request->type === 'paid') {
+                // JALANKAN FIFO HANYA SAAT PAID
+                $appliedBatches = $this->processStockOutFIFO(
+                    $bahan['product_id'],
+                    $request->loc_id,
+                    $totalQtyBase,
+                    $sales->sales_mstr_id
+                );
+
+                // Hapus detail sementara (yang batch_id-nya null) untuk resep ini
+                $prescription->details()->where('pres_det_productid', $bahan['product_id'])->delete();
+
+                // SIMPAN DETAIL BARU DENGAN BATCH ID
+                foreach ($appliedBatches as $ab) {
+                    $prescription->details()->create([
+                        'pres_det_productid' => $bahan['product_id'],
+                        'pres_det_um'        => $bahan['measurement_id'],
+                        'pres_det_batchid'   => $ab['batch_id'], // SEKARANG SUDAH ADA BATCH
+                        'pres_det_qty'       => $ab['qty'] / $conversion,
+                        'pres_det_price'     => $bahan['price'],
+                    ]);
+                }
+            } else {
+                // JIKA MASIH HOLD, TETAP SIMPAN SEBAGAI DRAFT DETAIL (BATCH NULL)
+                $prescription->details()->updateOrCreate(
+                    ['pres_det_productid' => $bahan['product_id'], 'pres_det_batchid' => null],
+                    [
+                        'pres_det_um'    => $bahan['measurement_id'],
+                        'pres_det_qty'   => $bahan['qty'],
+                        'pres_det_price' => $bahan['price'],
+                    ]
+                );
             }
         }
 
