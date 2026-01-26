@@ -98,6 +98,7 @@ class SrMstrController extends Controller
             'details.product',        // Mengambil nama produk
             'details.measurement',    // Mengambil satuan (Unit of Measurement)
             'details.batch',          // Mengambil info Batch dan Expired
+            'details.salesDetail.prescription'   // Mengambil info detail sales terkait
         ])->findOrFail($id);
 
         // Pastikan path view sesuai dengan lokasi file Sales Return kamu

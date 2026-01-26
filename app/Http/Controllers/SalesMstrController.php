@@ -557,6 +557,8 @@ class SalesMstrController extends Controller
                 ]);
             }
 
+            // dd($sales);
+
             $subtotal = 0;
 
 
@@ -569,11 +571,6 @@ class SalesMstrController extends Controller
                     $this->processSingleItem($sales, $item, $request);
                 }
             }
-
-
-
-
-
 
             // 💰 FINANCIAL (HANYA PAID)
             if ($request->type === 'paid' && $request->payment_type === 'cash') {

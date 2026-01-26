@@ -70,7 +70,11 @@
                                 @foreach ($sr->details as $detail)
                                     <tr>
                                         <td style="text-align:center;">{{ $loop->iteration }}</td>
-                                        <td>{{ $detail->product->name }}</td>
+                                        @if ($detail->product)
+                                            <td>{{ $detail->product->name }}</td>
+                                        @else
+                                            <td>{{ $detail->salesDetail->prescription->pres_mstr_name }}</td>
+                                        @endif
                                         <td style="text-align:right;">{{ numfmt($detail->sr_det_qty) }}</td>
                                         <td style="text-align:center;">{{ $detail->measurement->name ?? '-' }}</td>
                                         <td style="text-align:right;">{{ rupiah($detail->sr_det_price) }}</td>

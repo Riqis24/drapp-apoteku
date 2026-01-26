@@ -7,6 +7,7 @@ use App\Models\SrDet;
 use App\Models\ArMstr;
 use App\Models\SrMstr;
 use App\Models\stocks;
+use App\Models\PresMstr;
 use App\Models\SalesDet;
 use App\Models\SalesMstr;
 use App\Models\FinancialRecords;
@@ -70,6 +71,7 @@ class SalesReturnService
             $salesDet->increment('sales_det_qtyreturn', $item['qty'] ?? 0);
           }
         } else {
+          $this->returnRacikan($return, $salesDet, $item['qty'] ?? 0);
           $sales = $salesDet->update([
             'sales_det_qtyreturn' => $salesDet->sales_det_qtyreturn + $item['qty'] ?? 0
           ]);
@@ -80,6 +82,51 @@ class SalesReturnService
       // 4️⃣ FINANCIAL REVERSAL
       $this->reverseFinancial($return);
     });
+  }
+
+  protected function returnRacikan(SrMstr $return, SalesDet $salesDet, float $qty)
+  {
+    if ($qty <= 0) return;
+
+    // A. KEMBALIKAN STOK BAHAN BAKU (FIFO Balik)
+    // Ambil detail bahan dari resep/prescription
+    $prescription = PresMstr::with('details')->find($salesDet->sales_det_pmid);
+
+    // if ($prescription) {
+    //   foreach ($prescription->details as $bahan) {
+    //     // Hitung berapa banyak bahan yang balik (proporsional terhadap jumlah bungkus)
+    //     // Jika 1 resep untuk 10 bungkus, dan return 2 bungkus, maka bahan balik 2/10
+    //     $ratio = $qty / $prescription->pres_mstr_qty;
+    //     $qtyBahanBalik = $bahan->pres_det_qty * $ratio;
+
+    //     // Masukkan kembali ke stok
+    //     Stocks::updateOrCreate(
+    //       [
+    //         'product_id' => $bahan->pres_det_productid,
+    //         'loc_id' => $salesDet->sales_det_locid,
+    //         'batch_id' => $bahan->pres_det_batchid
+    //       ],
+    //       ['quantity' => DB::raw("quantity + {$qtyBahanBalik}")]
+    //     );
+    //   }
+    // }
+
+    // B. BUAT DETAIL FINANCIAL (SrDet)
+    // Harga per bungkus sudah nett di sales_det_price
+    SrDet::create([
+      'sr_det_mstrid'    => $return->sr_mstr_id,
+      'sr_det_sdid'      => $salesDet->sales_det_id,
+      'sr_det_productid' => 0, // 0 untuk menandakan racikan
+      'sr_det_um'        => $salesDet->sales_det_um,
+      'sr_det_umconv'        => 1,
+      'sr_det_qty'       => $qty,
+      'sr_det_qtyconv'       => $qty,
+      'sr_det_batchid'       => 0,
+      'sr_det_price'     => $salesDet->sales_det_price,
+      'sr_det_subtotal'  => $qty * $salesDet->sales_det_price,
+      'sr_det_is_racikan' => true, // Pastikan ada flag ini di database
+      'sr_det_prescode'  => $salesDet->sales_det_prescode,
+    ]);
   }
 
   protected function returnSingle(SrMstr $return, SalesDet $salesDet, float $qty)
@@ -153,53 +200,49 @@ class SalesReturnService
 
   protected function reverseFinancial(SrMstr $return)
   {
-    // dd($return->sales);
-    // 1. Ambil data Sales terkait
     $sales = $return->sales;
     if (!$sales) return;
 
-    // 2. Hitung total yang direturn (dari detail return)
-    $returnTotal = $return->details()->sum('sr_det_subtotal');
-    $paid = (float) $sales->sales_mstr_paidamt;
+    $returnTotal = (float) $return->details()->sum('sr_det_subtotal');
+    $currentPaid = (float) $sales->sales_mstr_paidamt;
+    $change = (float) $sales->sales_mstr_changeamt;
 
-    // 3. Ambil dan Update AR (Accounts Receivable / Piutang)
-    $ar = ArMstr::where('ar_mstr_salesid', $sales->sales_mstr_id)
-      ->lockForUpdate() // Mengunci row agar tidak ada double update
-      ->first();
+    // 1. Tentukan uang riil (Net)
+    if ($change > 0) {
+      $availableCash = $currentPaid - $change;
+      $sales->sales_mstr_changeamt = 0; // Reset change agar retur berikutnya tidak potong lagi
+    } else {
+      $availableCash = $currentPaid;
+    }
 
+    // 2. Update AR (Piutang)
+    $ar = ArMstr::where('ar_mstr_salesid', $sales->sales_mstr_id)->lockForUpdate()->first();
     if ($ar) {
       $ar->ar_mstr_amount  -= $returnTotal;
       $ar->ar_mstr_balance -= $returnTotal;
-
       if ($ar->ar_mstr_balance <= 0) {
         $ar->ar_mstr_balance = 0;
         $ar->ar_mstr_status = 'paid';
       } else {
-        // Jika piutang masih ada sisa
-        $ar->ar_mstr_status = ($paid <= 0) ? 'unpaid' : 'partial';
+        $ar->ar_mstr_status = ($availableCash <= 0) ? 'unpaid' : 'partial';
       }
       $ar->save();
     }
 
-    // 4. Update Status Sales ke VOID jika AR sudah nol (Return Total)
+    // 3. Update Status Sales ke VOID jika retur total
     if ($ar && $ar->ar_mstr_amount <= 0) {
-      $sales->update(['sales_mstr_status' => 'void']);
+      $sales->sales_mstr_status = 'void';
     }
 
-    // 5. Cek apakah ada uang yang harus dikembalikan (Refund)
-    // Jika belum bayar sama sekali (paid <= 0), maka tidak ada record financial (kas keluar)
-    if ($paid <= 0) return;
-
-    // Refund maksimal sebesar yang sudah pernah dibayar (mencegah rugi akibat diskon global)
-    $refund = min($paid, $returnTotal);
-
+    // 4. Hitung Refund Tunai
+    $refund = min($availableCash, $returnTotal);
 
     if ($refund > 0) {
-      // Logika DPP dan PPN (Asumsi PPN 11%)
-      $dppRefund = $refund / 1.11;
-      $ppnRefund = $refund - $dppRefund;
       if ($sales->sales_mstr_ppnamt > 0) {
-        // A. Catat Pengembalian Pendapatan (DPP) ke Expense
+        $dppRefund = $refund / 1.11;
+        $ppnRefund = $refund - $dppRefund;
+
+        // Record DPP
         FinancialRecords::create([
           'amount'      => $dppRefund,
           'type'        => 'expense',
@@ -207,28 +250,21 @@ class SalesReturnService
           'source_type' => SrMstr::class,
           'source_id'   => $return->sr_mstr_id,
           'date'        => now(),
-          'created_by' => auth()->user()->user_mstr_id,
+          'created_by'  => auth()->user()->user_mstr_id,
         ]);
 
-        // B. Catat Pembatalan Hutang Pajak (PPN)
-        if ($sales->sales_mstr_ppnamt > 0) {
-          FinancialRecords::create([
-            'amount'      => $ppnRefund,
-            'type'        => 'liability',
-            'data_source' => 'PPN Return Penjualan',
-            'source_type' => SrMstr::class,
-            'source_id'   => $return->sr_mstr_id,
-            'date'        => now(),
-            'created_by' => auth()->user()->user_mstr_id,
-          ]);
-        }
-
-
-
-        // C. Kurangi nilai 'paid' di Sales Master
-        $sales->decrement('sales_mstr_paidamt', $refund);
+        // Record PPN
+        FinancialRecords::create([
+          'amount'      => $ppnRefund,
+          'type'        => 'liability',
+          'data_source' => 'PPN Return Penjualan',
+          'source_type' => SrMstr::class,
+          'source_id'   => $return->sr_mstr_id,
+          'date'        => now(),
+          'created_by'  => auth()->user()->user_mstr_id,
+        ]);
       } else {
-        // A. Catat Pengembalian Pendapatan (DPP) ke Expense
+        // Record Non-PPN
         FinancialRecords::create([
           'amount'      => $refund,
           'type'        => 'expense',
@@ -236,12 +272,16 @@ class SalesReturnService
           'source_type' => SrMstr::class,
           'source_id'   => $return->sr_mstr_id,
           'date'        => now(),
-          'created_by' => auth()->user()->user_mstr_id,
+          'created_by'  => auth()->user()->user_mstr_id,
         ]);
-
-        // C. Kurangi nilai 'paid' di Sales Master
-        $sales->decrement('sales_mstr_paidamt', $refund);
       }
+
+      // Update nilai paid di memori
+      $availableCash = $availableCash - $refund;
     }
+
+    // 5. FINAL SAVE (Menyimpan PaidAmt baru dan ChangeAmt = 0)
+    $sales->sales_mstr_paidamt = $availableCash;
+    $sales->save();
   }
 }
