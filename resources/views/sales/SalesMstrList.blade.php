@@ -80,7 +80,7 @@
 
     @push('scripts')
         {{-- <script src="{{ 'assets/js/CustMstr/getData.js' }}"></script> --}}
-        <script src="{{ 'assets/js/alert.js' }}"></script>
+        <script src="{{ url('assets/js/alert.js') }}"></script>
         <script>
             $("#SalesTable").DataTable({
                 scrollX: true, // Wajib untuk tabel lebar seperti ini

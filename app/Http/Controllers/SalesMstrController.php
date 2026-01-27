@@ -1116,7 +1116,7 @@ class SalesMstrController extends Controller
 
             DB::commit();
             return redirect()->back()->with('success', 'Transaksi berhasil dihapus. Stok (non-racikan) telah dikembalikan.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Gagal menghapus transaksi: ' . $e->getMessage());
         }

@@ -148,10 +148,6 @@ class ProductController extends Controller
             ]);
 
             return redirect()->back()->with('success', 'Product berhasil diperbarui!');
-        } catch (ValidationException $e) {
-            return redirect()->back()
-                ->withErrors($e->validator)
-                ->withInput();
         } catch (Exception $e) {
             Log::error('Gagal memperbarui Product ID: ' . $id, ['error' => $e->getMessage()]);
             return redirect()->back()->with('error', 'Terjadi kesalahan saat memperbarui Product.');
