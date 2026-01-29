@@ -84,7 +84,7 @@
                                         <td class="fw-bold text-primary">{{ $detail->master->arpay_mstr_nbr }}</td>
                                         <td class="text-center">
                                             {{ date('d/m/Y', strtotime($detail->master->arpay_mstr_date)) }}</td>
-                                        <td>{{ $detail->master->customer->cust_mstr_name ?? '-' }}</td>
+                                        <td>{{ $detail->master->customer->name ?? '-' }}</td>
                                         <td class="text-end fw-bold">{{ rupiah($detail->arpay_det_amount) }}</td>
                                         <td class="text-center">
                                             <span

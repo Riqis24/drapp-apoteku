@@ -906,7 +906,6 @@ class SalesMstrController extends Controller
         }
 
 
-        // dd($sales);
 
         // 3. SIMPAN KE DETAIL PENJUALAN (Cukup 1 Baris per Racikan)
         // diletakkan di luar loop detail bahan
@@ -994,7 +993,7 @@ class SalesMstrController extends Controller
             throw new \Exception("Stok negatif telah diizinkan, namun stok fisik untuk produk ID {$productId} di lokasi ID {$locId} sudah habis.");
         }
 
-        return $usedBatches; // Benar di sini
+        return $usedBatches; 
     }
 
 

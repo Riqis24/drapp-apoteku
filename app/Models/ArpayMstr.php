@@ -28,4 +28,9 @@ class ArpayMstr extends Model
     {
         return $this->hasMany(ArPayDet::class, 'arpay_det_mstrid');
     }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'arpay_mstr_customerid');
+    }
 }

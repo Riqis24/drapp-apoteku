@@ -139,6 +139,8 @@ class SoMstrController extends Controller
         if ($so->so_mstr_status !== 'draft') {
             abort(403, 'Opname sudah dikunci');
         }
+        dd($request->all(), $id);
+
 
         foreach ($request->details as $detId => $row) {
             SoDet::where('so_det_id', $detId)
@@ -147,6 +149,8 @@ class SoMstrController extends Controller
                     'so_det_note'         => $row['note'] ?? null,
                 ]);
         }
+
+
 
         return back()->with('success', 'Data opname disimpan');
     }
