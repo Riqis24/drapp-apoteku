@@ -36,7 +36,7 @@
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $sa->sa_mstr_nbr }}</td>
                                         <td>{{ $sa->sa_mstr_date }}</td>
-                                        <td>{{ $sa->location->location_mstr_name }}</td>
+                                        <td>{{ $sa->location->loc_mstr_name }}</td>
                                         <td>{{ $sa->sa_mstr_reason }}</td>
                                         <td>
                                             <span

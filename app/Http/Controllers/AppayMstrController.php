@@ -33,7 +33,7 @@ class AppayMstrController extends Controller
 
     public function getApBySupplier($suppid)
     {
-        return ApMstr::where('ap_mstr_suppid', $suppid)
+        return ApMstr::with('BpbMstr')->where('ap_mstr_suppid', $suppid)
             ->where('ap_mstr_balance', '>', 0)
             ->orderBy('ap_mstr_duedate')
             ->get();

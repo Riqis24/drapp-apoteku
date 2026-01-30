@@ -51,7 +51,7 @@
                                             <input type="hidden" name="items[{{ $i }}][bpb_det_id]"
                                                 value="{{ $row->bpb_det_id }}">
                                         </td>
-                                        <td>{{ $row->bpb_det_batch }}</td>
+                                        <td>{{ $row->batch->batch_mstr_no }}</td>
                                         <td>{{ $row->bpb_det_expired }}</td>
                                         <td class="text-end">{{ $row->bpb_det_qty }}</td>
                                         <td class="text-end">{{ $row->qty_returned }}</td>

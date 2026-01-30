@@ -61,6 +61,7 @@
                                 <tr>
                                     <th width="5%">✔</th>
                                     <th>No AP</th>
+                                    <th>No Faktur</th>
                                     <th>Tanggal</th>
                                     <th>Jatuh Tempo</th>
                                     <th class="text-end">Sisa Hutang</th>
@@ -103,6 +104,7 @@
                         <input type="hidden" name="items[${i}][ap_id]" value="${ap.ap_mstr_id}">
                     </td>
                     <td>${ap.ap_mstr_nbr}</td>
+                    <td>${ap.BpbMstr.bpb_mstr_nofaktur}</td>
                     <td>${ap.ap_mstr_date}</td>
                     <td>${ap.ap_mstr_duedate}</td>
                     <td class="text-end">${format(ap.ap_mstr_balance)}</td>
