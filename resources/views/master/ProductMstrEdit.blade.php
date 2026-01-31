@@ -256,14 +256,38 @@
                                         </div>
 
                                         <div class="mt-4 p-3 rounded border border-dashed">
-                                            <p class="small text-muted mb-1"><i
-                                                    class="bi bi-info-circle-fill text-info"></i>
-                                                Info Harga Terakhir</p>
-                                            <h5 class="mb-0 fw-bold">Rp
-                                                {{ number_format($product->ProductMeasurements->first()->last_buy_price ?? 0, 0, ',', '.') }}
-                                            </h5>
-                                            <small class="text-muted">Margin Saat Ini:
-                                                {{ $product->margin }}%</small>
+                                            <p class="small text-muted mb-2">
+                                                <i class="bi bi-info-circle-fill text-info"></i> Info Harga Beli
+                                                Terakhir & Margin
+                                            </p>
+
+                                            <div class="row g-2">
+                                                @foreach ($product->productMeasurements as $pm)
+                                                    <div class="col-6 col-md-4">
+                                                        <div class="p-2 bg-white border rounded shadow-sm">
+                                                            <div
+                                                                class="d-flex justify-content-between align-items-center mb-1">
+                                                                <span
+                                                                    class="badge bg-primary-subtle text-primary small">{{ $pm->measurement->name ?? '-' }}</span>
+                                                                <small class="text-muted"
+                                                                    style="font-size: 10px;">Conv:
+                                                                    {{ (int) $pm->conversion }}</small>
+                                                            </div>
+                                                            <h6 class="mb-0 fw-bold text-dark">
+                                                                Rp
+                                                                {{ number_format($pm->last_buy_price ?? 0, 0, ',', '.') }}
+                                                            </h6>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+
+                                            <div class="mt-2 pt-2 border-top">
+                                                <small class="text-muted d-flex justify-content-between">
+                                                    <span>Margin Standar Produk:</span>
+                                                    <span class="fw-bold text-success">{{ $product->margin }}%</span>
+                                                </small>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

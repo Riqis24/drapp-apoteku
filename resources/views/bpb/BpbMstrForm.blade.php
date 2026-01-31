@@ -249,27 +249,42 @@
         </div>
     </div>
 
-    {{-- modal update harga --}}
+    {{-- Modal Update Harga --}}
     <div class="modal fade" id="priceUpdateModal" data-bs-backdrop="static" tabindex="-1">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header bg-info">
-                    <h5 class="modal-title text-white">Pengaturan Harga Jual</h5>
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                {{-- Header dengan Gradient --}}
+                <div class="modal-header border-0 text-white"
+                    style="background: linear-gradient(45deg, #4e73df 0%, #224abe 100%);">
+                    <h5 class="modal-title d-flex align-items-center">
+                        <i class="fas fa-chart-line me-2"></i>
+                        <span class="fw-bold">Penyesuaian Harga Jual</span>
+                    </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <p class="fw-bold mb-1">Pengaturan Harga Jual Berdasarkan Perubahan Harga Pembelian</p>
+
+                <div class="modal-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold mb-1 text-primary">Analisa Margin Keuntungan</h6>
+                            <p class="text-muted small mb-0">Harga beli berubah. Sesuaikan harga jual agar profit tetap
+                                terjaga.</p>
+                        </div>
+                    </div>
+
                     <div class="table-responsive">
-                        <table class="table table-sm table-bordered">
-                            <thead class="bg-info text-center">
-                                <tr class="text-white">
+                        <table class="table table-bordered table-sm align-middle">
+                            <thead class="table-light text-center">
+                                <tr>
                                     <th>Kode</th>
-                                    <th>Nama Barang</th>
+                                    <th>Produk</th>
                                     <th>Unit</th>
-                                    <th>Hrg. Beli Lama</th>
-                                    <th>Hrg. Beli Baru</th>
-                                    <th>Hrg. Jual Lama</th>
-                                    <th style="width: 200px">Hrg. Jual Baru</th>
+                                    <th>Harga Beli Lama</th>
+                                    <th>Harga Beli Baru (Bf. PPN)</th>
+                                    <th>PPN</th>
+                                    <th>Harga Baru After PPN</th>
+                                    <th>Harga Jual Lama</th>
+                                    <th style="width: 150px;">Harga Jual Baru</th>
                                 </tr>
                             </thead>
                             <tbody id="priceUpdateContent">
@@ -277,9 +292,13 @@
                         </table>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="saveNewPrices()">Simpan</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+
+                <div class="modal-footer bg-light border-0">
+                    <button type="button" class="btn btn-outline-secondary px-4"
+                        data-bs-dismiss="modal">Abaikan</button>
+                    <button type="button" class="btn btn-primary px-4 shadow-sm fw-bold" onclick="saveNewPrices()">
+                        <i class="fas fa-save me-1"></i> Simpan Perubahan Harga
+                    </button>
                 </div>
             </div>
         </div>
@@ -321,6 +340,34 @@
     </div>
 
     @push('scripts')
+        {{-- <style>
+            #priceUpdateModal .modal-content {
+                border-radius: 15px;
+                overflow: hidden;
+            }
+
+            #priceUpdateModal .table thead th {
+                font-size: 0.85rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                padding-top: 15px;
+                padding-bottom: 15px;
+            }
+
+            #priceUpdateModal .form-control-sm {
+                border-radius: 6px;
+                border-color: #dee2e6;
+            }
+
+            #priceUpdateModal .form-control-sm:focus {
+                border-color: #0dcaf0;
+                box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
+            }
+
+            .bg-light-danger {
+                background-color: #fff5f5;
+            }
+        </style> --}}
         <style>
             @media (max-width: 767.98px) {
 
@@ -830,7 +877,7 @@
             }
 
             function handleUpdatePriceCheckbox(chk, productId, measurementId) {
-                console.log('masuk handleUpdatePriceCheckbox');
+                // console.log('masuk handleUpdatePriceCheckbox');
 
                 if ($(chk).is(':checked')) {
                     let row = $(chk).closest('tr');
@@ -847,46 +894,67 @@
             }
 
             function openUpdatePriceModal(productId, bpbPrice, selectedMeasurementId) {
+                // Ambil nilai PPN dari input form utama
+                let ppnRateInput = $('#ppnrate').val() || 0;
+                const PPN_DECIMAL = parseFloat(ppnRateInput) / 100;
+
                 $('#priceUpdateModal').modal('show');
-                $('#priceUpdateContent').html('<tr><td colspan="7" class="text-center">Loading...</td></tr>');
+                $('#priceUpdateContent').html('<tr><td colspan="9" class="text-center">Memuat data...</td></tr>');
 
                 $.get(`/BpbMstr/getMeasurementPrices/${productId}`, function(res) {
-                    // 1. Cari nilai konversi dari unit yang dipilih di baris BPB
-
                     let currentUnit = res.measurements.find(m => m.measurement_id == selectedMeasurementId);
-
                     let conversionInBpb = currentUnit ? currentUnit.conversion : 1;
 
-                    // 2. Hitung Harga Dasar (Harga per 1 Tablet/satuan terkecil)
-                    let basePrice = bpbPrice / conversionInBpb;
-                    // console.log("baseprice:", basePrice);
+                    // Hitung harga dasar satuan terkecil (base price) sebelum PPN
+                    let basePriceExclPpn = bpbPrice / conversionInBpb;
 
-                    // 3. SORTING: Dari Konversi Terbesar ke Terkecil (Box -> Strip -> Tablet)
-                    // b.conversion (40) - a.conversion (1) = Positif (b pindah ke atas)
+                    // Urutkan dari satuan terbesar (Box -> Strip -> Tablet)
                     let sortedMeasurements = res.measurements.sort((a, b) => b.conversion - a.conversion);
 
                     let html = '';
                     sortedMeasurements.forEach((m, index) => {
-                        // 4. HITUNG ULANG: Harga per baris = Base Price x Konversi baris tersebut
-                        let estBuyPriceNew = basePrice * m.conversion;
-                        let margin = estBuyPriceNew * (res.product.margin / 100);
-                        // console.log("margin: ", margin);
+                        // KALKULASI
+                        let hrgBaruBfPpn = basePriceExclPpn * m.conversion; // Harga Baru Before PPN
+                        let ppnNominal = hrgBaruBfPpn * PPN_DECIMAL; // Nilai PPN
+                        let hrgBaruAfPpn = hrgBaruBfPpn + ppnNominal; // Harga Baru After PPN
+
+                        // Margin dari harga after PPN
+                        let marginNominal = hrgBaruAfPpn * (res.product.margin / 100);
+                        let hrgJualBaru = hrgBaruAfPpn + marginNominal;
+
                         html += `
                 <tr>
-                    <td class="text-center">${index === 0 ? res.product.code : ''}</td>
-                    <td>${index === 0 ? res.product.name : ''}</td>
-                    <td class="text-center"><b>${m.unit_name}</b></td>
-                    <td class="text-end text-muted">--</td>
-                    <td class="text-end text-danger fw-bold">
-                        ${new Intl.NumberFormat('id-ID').format(estBuyPriceNew)}
+                    <td class="text-center">${index === 0 ? `<small>${res.product.code}</small>` : ''}</td>
+                    <td>${index === 0 ? `<b>${res.product.name}</b>` : ''}</td>
+                    <td class="text-center"><span class="badge border text-dark">${m.unit_name}</span></td>
+                    
+                    <td class="text-end text-muted">
+                        ${new Intl.NumberFormat('id-ID').format(m.last_bp || 0)}
                     </td>
-                    <td class="text-end">
+                    
+                    <td class="text-end fw-bold">
+                        ${new Intl.NumberFormat('id-ID').format(hrgBaruBfPpn)}
+                    </td>
+                    
+                    <td class="text-end text-info">
+                        ${new Intl.NumberFormat('id-ID').format(ppnNominal)}
+                    </td>
+                    
+                    <td class="text-end text-danger fw-bold">
+                        ${new Intl.NumberFormat('id-ID').format(hrgBaruAfPpn)}
+                    </td>
+
+                    <td class="text-end text-muted">
                         ${new Intl.NumberFormat('id-ID').format(m.old_sell_price || 0)}
                     </td>
+                    
                     <td>
-                        <input type="number" class="form-control text-end new-sell-price" 
-                               data-pmid="${m.pm_id}" 
-                               value="${estBuyPriceNew + margin || 0}">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">Rp</span>
+                            <input type="number" class="form-control text-end fw-bold new-sell-price" 
+                                   data-pmid="${m.pm_id}" 
+                                   value="${Math.round(hrgJualBaru)}">
+                        </div>
                     </td>
                 </tr>`;
                     });

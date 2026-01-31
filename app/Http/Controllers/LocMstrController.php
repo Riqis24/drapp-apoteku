@@ -22,50 +22,68 @@ class LocMstrController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'loc_mstr_code' => 'required|unique:loc_mstr,loc_mstr_code',
-            'loc_mstr_name' => 'required',
+        // 1. Validasi
+        $validated = $request->validate([
+            'loc_mstr_code'      => 'required|unique:loc_mstr,loc_mstr_code|max:20',
+            'loc_mstr_name'      => 'required|max:100',
+            'loc_mstr_active'    => 'nullable|boolean',
+            'loc_mstr_isvisible' => 'nullable|boolean',
         ]);
 
-        LocMstr::create([
-            'loc_mstr_code' => $request->loc_mstr_code,
-            'loc_mstr_name' => $request->loc_mstr_name,
-            'loc_mstr_active' => $request->has('loc_mstr_active') ? 1 : 0,
-            'loc_mstr_isvisible' => $request->has('loc_mstr_isvisible') ? 1 : 0
-        ]);
+        try {
+            // 2. Simpan Data
+            // Menggunakan $request->merge atau default value jika checkbox tidak tercentang
+            LocMstr::create([
+                'loc_mstr_code'      => $validated['loc_mstr_code'],
+                'loc_mstr_name'      => $validated['loc_mstr_name'],
+                'loc_mstr_active'    => $request->boolean('loc_mstr_active'),
+                'loc_mstr_isvisible' => $request->boolean('loc_mstr_isvisible'),
+            ]);
 
-        return redirect()->route('LocMstr.index')->with('success', 'Gudang berhasil ditambahkan');
-    }
-
-    public function edit($id)
-    {
-        $location = LocMstr::findOrFail($id);
-        return view('loc_mstr.edit', compact('location'));
+            return redirect()->route('LocMstr.index')
+                ->with('success', 'Gudang berhasil ditambahkan');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan saat menyimpan data.');
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $location = LocMstr::findOrFail($id);
-
         $request->validate([
             'loc_mstr_code' => 'required|unique:loc_mstr,loc_mstr_code,' . $id . ',loc_mstr_id',
             'loc_mstr_name' => 'required',
         ]);
 
-        $location->update([
+        $loc = LocMstr::findOrFail($id);
+        $loc->update([
             'loc_mstr_code' => $request->loc_mstr_code,
             'loc_mstr_name' => $request->loc_mstr_name,
-            'loc_mstr_active' => $request->has('loc_mstr_active') ? 1 : 0
+            'loc_mstr_isvisible' => $request->loc_mstr_isvisible,
         ]);
 
-        return redirect()->route('loc_mstr.index')->with('success', 'Gudang berhasil diupdate');
+        return redirect()->back()->with('success', 'Lokasi berhasil diperbarui');
     }
 
     public function destroy($id)
     {
-        $location = LocMstr::findOrFail($id);
-        $location->delete();
+        // Cek jika masih ada stok di lokasi ini sebelum hapus
+        $hasStock = \App\Models\stocks::where('loc_id', $id)->where('quantity', '>', 0)->exists();
 
-        return redirect()->route('loc_mstr.index')->with('success', 'Gudang berhasil dihapus');
+        if ($hasStock) {
+            return redirect()->back()->with('error', 'Gagal! Lokasi ini masih memiliki stok barang.');
+        }
+
+        LocMstr::destroy($id);
+        return redirect()->back()->with('success', 'Lokasi berhasil dihapus');
     }
+
+    // public function destroy($id)
+    // {
+    //     $location = LocMstr::findOrFail($id);
+    //     $location->delete();
+
+    //     return redirect()->route('loc_mstr.index')->with('success', 'Gudang berhasil dihapus');
+    // }
 }
