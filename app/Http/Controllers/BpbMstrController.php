@@ -160,11 +160,6 @@ class BpbMstrController extends Controller
                         'created_at' => now() // Ditambahkan jika record baru dibuat
                     ]
                 );
-
-                ProductMeasurements::updateOrCreate(
-                    ['id' => $item['id']],
-                    ['last_buy_price' => $hb]
-                );
             }
 
 
@@ -521,6 +516,30 @@ class BpbMstrController extends Controller
                             $poDet->po_det_qtyrcvd   += $qtyRcvd;
                             $poDet->po_det_qtyremain -= $qtyRcvd;
                             $poDet->save();
+                        }
+                    }
+
+                    // ---------- UPDATE LAST BUY PRICE ----------
+                    // Cek jika user mencentang 'updateprice' atau tambahkan pengecekan logika bisnis kamu
+                    if (($item['updateprice'] ?? 0) == 1) {
+                        // 1. Ambil semua satuan milik produk ini
+                        $netPricePerUnit = $totalPerLine / $qtyRcvd;
+
+                        // 2. Hitung Harga Netto per Satuan Terkecil (Tablet)
+                        $netPriceBase = $netPricePerUnit / $umConv;
+
+                        // ---------- UPDATE LAST BUY PRICE ----------
+                        if (($item['updateprice'] ?? 0) == 1) {
+                            $allMeasurements = ProductMeasurements::where('product_id', $item['productid'])->get();
+
+                            foreach ($allMeasurements as $pm) {
+                                // Harga beli terakhir = Harga Netto Base x Konversi Satuan tersebut
+                                $newLastBuyPrice = $netPriceBase * $pm->conversion;
+
+                                $pm->update([
+                                    'last_buy_price' => $newLastBuyPrice
+                                ]);
+                            }
                         }
                     }
                 }
