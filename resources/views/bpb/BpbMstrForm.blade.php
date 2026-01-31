@@ -68,19 +68,19 @@
                         <div class="col-md-4">
                             <label>No Faktur</label>
                             <input type="text" name="nofaktur" class="form-control"
-                                value="{{ old('nofaktur', $bpb->bpb_mstr_nofaktur ?? '') }}">
+                                value="{{ old('nofaktur', $bpb->bpb_mstr_nofaktur ?? '') }}" required>
                         </div>
 
                         <div class="col-md-4">
                             <label>No SJ</label>
                             <input type="text" name="nosj" class="form-control"
-                                value="{{ old('nosj', $bpb->bpb_mstr_nosj ?? '') }}">
+                                value="{{ old('nosj', $bpb->bpb_mstr_nosj ?? '') }}" required>
                         </div>
 
                         <div class="col-md-4">
                             <label>Catatan</label>
                             <input type="text" name="note" class="form-control"
-                                value="{{ old('note', $bpb->bpb_mstr_note ?? '') }}">
+                                value="{{ old('note', $bpb->bpb_mstr_note ?? '') }}" required>
                         </div>
 
                         <div class="col-md-6">

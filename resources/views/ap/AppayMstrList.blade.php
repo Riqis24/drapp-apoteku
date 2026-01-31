@@ -72,7 +72,7 @@
 
                             <tfoot>
                                 <tr>
-                                    <th colspan="5" class="text-end">TOTAL BAYAR</th>
+                                    <th colspan="6" class="text-end">TOTAL BAYAR</th>
                                     <th class="text-end">
                                         <input type="text" id="totalPay" class="form-control text-end" readonly>
                                     </th>
@@ -105,7 +105,7 @@
                         <input type="hidden" name="items[${i}][ap_id]" value="${ap.ap_mstr_id}">
                     </td>
                     <td>${ap.ap_mstr_nbr}</td>
-                    <td>${ap.BpbMstr.bpb_mstr_nofaktur}</td>
+                    <td>${ap.bpbmstr.bpb_mstr_nofaktur}</td>
                     <td>${ap.ap_mstr_date}</td>
                     <td>${ap.ap_mstr_duedate}</td>
                     <td class="text-end">${format(ap.ap_mstr_balance)}</td>

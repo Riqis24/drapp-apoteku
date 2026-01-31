@@ -33,7 +33,7 @@ class AppayMstrController extends Controller
 
     public function getApBySupplier($suppid)
     {
-        return ApMstr::with('BpbMstr')->where('ap_mstr_suppid', $suppid)
+        return ApMstr::with('bpbmstr')->where('ap_mstr_suppid', $suppid)
             ->where('ap_mstr_balance', '>', 0)
             ->orderBy('ap_mstr_duedate')
             ->get();
@@ -45,112 +45,96 @@ class AppayMstrController extends Controller
      */
     public function store(Request $request)
     {
+        // 1. Validasi Input
         $request->validate([
-            'appay_date' => 'required|date',
-            'suppid'     => 'required|exists:supp_mstr,supp_mstr_id',
-            'items'      => 'required|array|min:1',
-            'items.*.ap_id' => 'required|exists:ap_mstr,ap_mstr_id',
+            'appay_date'         => 'required|date',
+            'suppid'             => 'required|exists:supp_mstr,supp_mstr_id',
+            'items'              => 'required|array|min:1',
+            'items.*.ap_id'      => 'required|exists:ap_mstr,ap_mstr_id',
             'items.*.pay_amount' => 'required|numeric|min:1',
         ]);
 
-        // dd($request->all());
+        try {
+            $appay = DB::transaction(function () use ($request) {
 
-        DB::transaction(function () use ($request) {
+                // 2. Generate Number (Logika dipisah ke private function agar clean)
+                $nbr = $this->generateAppayNumber();
 
-            /* ===============================
-             * 1. Generate APPAY number
-             * =============================== */
-            $last = AppayMstr::orderByDesc('appay_mstr_id')->first();
-
-            if ($last && preg_match('/APPAY-(\d+)/', $last->appay_mstr_nbr, $m)) {
-                $next = (int)$m[1] + 1;
-            } else {
-                $next = 1;
-            }
-
-            $nbr = 'APPAY-' . str_pad($next, 5, '0', STR_PAD_LEFT);
-
-            /* ===============================
-             * 2. Create APPAY MASTER
-             * =============================== */
-            $appay = AppayMstr::create([
-                'appay_mstr_nbr'       => $nbr,
-                'appay_mstr_date'      => $request->appay_date,
-                'appay_mstr_suppid'    => $request->suppid,
-                'appay_mstr_method'    => $request->method,
-                'appay_mstr_refno'     => $request->refno,
-                'appay_mstr_note'      => $request->note,
-                'appay_mstr_total'     => 0,
-                'appay_mstr_createdby' => auth()->user()->user_mstr_id,
-            ]);
-
-            $totalPayment = 0;
-
-            /* ===============================
-             * 3. Loop pembayaran per AP
-             * =============================== */
-            foreach ($request->items as $row) {
-
-                if ($row['pay_amount'] <= 0) continue;
-
-                $ap = ApMstr::lockForUpdate()
-                    ->where('ap_mstr_id', $row['ap_id'])
-                    ->firstOrFail();
-
-                // ❗ Validasi supplier sama
-                if ($ap->ap_mstr_suppid != $request->suppid) {
-                    throw new \Exception('AP tidak sesuai supplier');
-                }
-
-                // ❗ Validasi overpayment
-                if ($row['pay_amount'] > $ap->ap_mstr_balance) {
-                    throw new \Exception(
-                        'Pembayaran melebihi sisa hutang AP ' . $ap->ap_mstr_nbr
-                    );
-                }
-
-                /* ===============================
-                 * 4. Insert APPAY DETAIL
-                 * =============================== */
-                AppayDet::create([
-                    'appay_det_mstrid'   => $appay->appay_mstr_id,
-                    'appay_det_apid'     => $ap->ap_mstr_id,
-                    'appay_det_payamount' => $row['pay_amount'],
+                // 3. Create Master
+                $appay = AppayMstr::create([
+                    'appay_mstr_nbr'       => $nbr,
+                    'appay_mstr_date'      => $request->appay_date,
+                    'appay_mstr_suppid'    => $request->suppid,
+                    'appay_mstr_method'    => $request->method,
+                    'appay_mstr_refno'     => $request->refno,
+                    'appay_mstr_note'      => $request->note,
+                    'appay_mstr_total'     => 0,
+                    'appay_mstr_createdby' => auth()->user()->user_mstr_id,
                 ]);
 
-                /* ===============================
-                 * 5. Update AP MASTER
-                 * =============================== */
-                $ap->ap_mstr_paid    += $row['pay_amount'];
-                $ap->ap_mstr_balance -= $row['pay_amount'];
+                $totalPayment = 0;
 
-                $ap->ap_mstr_status = $ap->ap_mstr_balance <= 0
-                    ? 'paid'
-                    : 'partial';
+                // 4. Proses Items
+                foreach ($request->items as $row) {
+                    if ($row['pay_amount'] <= 0) continue;
 
-                $ap->save();
+                    $ap = ApMstr::lockForUpdate()->findOrFail($row['ap_id']);
 
-                $totalPayment += $row['pay_amount'];
-            }
+                    // Validasi Keamanan
+                    if ($ap->ap_mstr_suppid != $request->suppid) {
+                        throw new \Exception("AP {$ap->ap_mstr_nbr} tidak sesuai dengan Supplier yang dipilih.");
+                    }
 
-            /* ===============================
-             * 6. Update total APPAY
-             * =============================== */
-            $appay->update([
-                'appay_mstr_total' => $totalPayment
-            ]);
+                    if ($row['pay_amount'] > $ap->ap_mstr_balance) {
+                        throw new \Exception("Pembayaran AP {$ap->ap_mstr_nbr} melebihi sisa hutang.");
+                    }
 
-            /* ===============================
-             * 7. (OPSIONAL) JURNAL
-             * Hutang (D) - Kas/Bank (C)
-             * =============================== */
-        });
+                    // Detail Payment
+                    AppayDet::create([
+                        'appay_det_mstrid'    => $appay->appay_mstr_id,
+                        'appay_det_apid'      => $ap->ap_mstr_id,
+                        'appay_det_payamount' => $row['pay_amount'],
+                    ]);
 
-        return redirect()
-            ->route('ApMstr.index')
-            ->with('success', 'Pembayaran hutang berhasil disimpan');
+                    // Update AP Master
+                    $ap->ap_mstr_paid    += $row['pay_amount'];
+                    $ap->ap_mstr_balance -= $row['pay_amount'];
+                    $ap->ap_mstr_status   = $ap->ap_mstr_balance <= 0 ? 'paid' : 'partial';
+                    $ap->save();
+
+                    $totalPayment += $row['pay_amount'];
+                }
+
+                // 5. Final Total Update
+                $appay->update(['appay_mstr_total' => $totalPayment]);
+
+                return $appay;
+            });
+
+            return redirect()->route('ApMstr.index')
+                ->with('success', "Pembayaran {$appay->appay_mstr_nbr} berhasil disimpan");
+        } catch (\Exception $e) {
+            // DI SINI KUNCINYA: Catch error agar Toast muncul
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal simpan: ' . $e->getMessage());
+        }
     }
 
+    /**
+     * Helper untuk generate nomor urut
+     */
+    private function generateAppayNumber()
+    {
+        $last = AppayMstr::orderByDesc('appay_mstr_id')->first();
+        $next = 1;
+
+        if ($last && preg_match('/APPAY-(\d+)/', $last->appay_mstr_nbr, $m)) {
+            $next = (int)$m[1] + 1;
+        }
+
+        return 'APPAY-' . str_pad($next, 5, '0', STR_PAD_LEFT);
+    }
     /**
      * Display the specified resource.
      */

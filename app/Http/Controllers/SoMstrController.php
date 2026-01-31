@@ -262,78 +262,84 @@ class SoMstrController extends Controller
 
     public function approve(Request $request, $id)
     {
-        // dd($id);
-        DB::transaction(function () use ($id) {
+        try {
+            DB::transaction(function () use ($id) {
+                // 1. Ambil data Master SO dengan Lock untuk mencegah race condition
+                $so = SoMstr::with('details')->lockForUpdate()->findOrFail($id);
 
-            $so = SoMstr::with('details')->lockForUpdate()->findOrFail($id);
+                if ($so->so_mstr_status !== 'draft') {
+                    throw new \Exception('Data Stock Opname ini sudah diproses sebelumnya.');
+                }
 
-            if ($so->so_mstr_status !== 'draft') {
-                throw new \Exception('Opname sudah diproses');
-            }
-
-            // create adjustment
-            $sa = SaMstr::create([
-                'sa_mstr_nbr'        => $this->generateSaNumber(),
-                'sa_mstr_date'      => now(),
-                'sa_mstr_locid'     => $so->so_mstr_locid,
-                'sa_mstr_ref'       => $so->so_mstr_id,
-                'sa_mstr_reason'    => 'Stock Opname',
-                'sa_mstr_status'    => 'posted',
-                'sa_mstr_createdby' => auth()->user()->user_mstr_id,
-            ]);
-
-
-            foreach ($so->details as $det) {
-
-                $diff = $det->so_det_qtyphysical - $det->so_det_qtysystem;
-                // dd($diff);
-                if ($diff == 0) continue;
-
-                SaDet::create([
-                    'sa_det_mstrid'       => $sa->sa_mstr_id,
-                    'sa_det_productid'    => $det->so_det_productid,
-                    'sa_det_batchid'      => $det->so_det_batchid,
-                    'sa_det_qtysystem'   => $det->so_det_qtysystem,
-                    'sa_det_qtyphysical' => $det->so_det_qtyphysical,
-                    'sa_det_qtydiff'     => $diff,
+                // 2. Buat Master Adjustment (SA)
+                $sa = SaMstr::create([
+                    'sa_mstr_nbr'       => $this->generateSaNumber(),
+                    'sa_mstr_date'      => now(),
+                    'sa_mstr_locid'     => $so->so_mstr_locid,
+                    'sa_mstr_ref'       => $so->so_mstr_id,
+                    'sa_mstr_reason'    => 'Stock Opname: ' . $so->so_mstr_nbr,
+                    'sa_mstr_status'    => 'posted',
+                    'sa_mstr_createdby' => auth()->user()->user_mstr_id,
                 ]);
 
-                // stock transaction
-                StockTransactions::create([
-                    'product_id'  => $det->so_det_productid,
-                    'loc_id'      => $so->so_mstr_locid,
-                    'batch_id'    => $det->so_det_batchid,
-                    'type'        => $diff > 0 ? 'in' : 'out',
-                    'quantity'    => $diff,
-                    'note'        => 'Stock Opname Adjustment (' . $so->so_mstr_nbr . ')',
-                    'source_type' => SaMstr::class,
-                    'source_id'   => $sa->sa_mstr_id,
-                    'date'        => now(),
-                    'created_by' => auth()->user()->user_mstr_id,
+                foreach ($so->details as $det) {
+                    $diff = $det->so_det_qtyphysical - $det->so_det_qtysystem;
 
+                    // Jika tidak ada selisih, tidak perlu buat jurnal/adjustment
+                    if ($diff == 0) continue;
+
+                    // 3. Simpan Detail Adjustment
+                    SaDet::create([
+                        'sa_det_mstrid'      => $sa->sa_mstr_id,
+                        'sa_det_productid'   => $det->so_det_productid,
+                        'sa_det_batchid'     => $det->so_det_batchid,
+                        'sa_det_qtysystem'   => $det->so_det_qtysystem,
+                        'sa_det_qtyphysical' => $det->so_det_qtyphysical,
+                        'sa_det_qtydiff'     => $diff,
+                    ]);
+
+                    // 4. Catat Kartu Stok (Stock Transactions)
+                    StockTransactions::create([
+                        'product_id'  => $det->so_det_productid,
+                        'loc_id'      => $so->so_mstr_locid,
+                        'batch_id'    => $det->so_det_batchid,
+                        'type'        => $diff > 0 ? 'in' : 'out',
+                        'quantity'    => $diff, // Menggunakan nilai positif untuk qty, dibedakan oleh 'type'
+                        'note'        => 'Stock Opname Adj (' . $so->so_mstr_nbr . ')',
+                        'source_type' => SaMstr::class,
+                        'source_id'   => $sa->sa_mstr_id,
+                        'date'        => now(),
+                        'created_by'  => auth()->user()->user_mstr_id,
+                    ]);
+
+                    // 5. Update Saldo Stok Real-time
+                    Stocks::updateOrCreate(
+                        [
+                            'product_id' => $det->so_det_productid,
+                            'batch_id'   => $det->so_det_batchid,
+                            'loc_id'     => $so->so_mstr_locid,
+                        ],
+                        [
+                            // Menggunakan DB::raw untuk menjamin konsistensi hitungan di level DB
+                            'quantity' => DB::raw("quantity + ({$diff})")
+                        ]
+                    );
+                }
+
+                // 6. Update Status Master SO
+                $so->update([
+                    'so_mstr_status'      => 'approved',
+                    'so_mstr_approvedby'  => auth()->user()->user_mstr_id,
+                    'so_mstr_approvedate' => now(),
                 ]);
+            });
 
-                Stocks::updateOrCreate(
-                    [
-                        'product_id' => $det->so_det_productid,
-                        'batch_id'   => $det->so_det_batchid,
-                        'loc_id'     => $so->so_mstr_locid,
-                    ],
-                    [
-                        'quantity' => DB::raw("quantity + {$diff}")
-                    ]
-                );
-            }
-
-            $so->update([
-                'so_mstr_status'     => 'approved',
-                'so_mstr_approvedby' => auth()->user()->user_mstr_id,
-                'so_mstr_approvedate' => now(),
-            ]);
-        });
-
-        return redirect()
-            ->route('SoMstr.index')
-            ->with('success', 'Stock opname berhasil diposting');
+            return redirect()->route('SoMstr.index')
+                ->with('success', 'Stock opname berhasil disetujui dan stok telah diperbarui.');
+        } catch (\Exception $e) {
+            // Menangkap error dan mengirimkannya ke Toast
+            return redirect()->back()
+                ->with('error', 'Gagal memproses approval: ' . $e->getMessage());
+        }
     }
 }

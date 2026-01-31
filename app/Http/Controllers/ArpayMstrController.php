@@ -63,79 +63,87 @@ class ArpayMstrController extends Controller
             'items'        => 'required|array|min:1',
         ]);
 
-        DB::transaction(function () use ($request) {
-            $totalPay = (float)str_replace('.', '', $request->totalPay);
-            // dd($totalPay);
+        $errorMessage = null;
 
-            // 1. header payment
-            $pay = ArPayMstr::create([
-                'arpay_mstr_nbr'       => $this->generateArPayNumber(),
-                'arpay_mstr_date'       => $request->pay_date,
-                'arpay_mstr_customerid' => $request->customer_id,
-                'arpay_mstr_amount'     => $totalPay,
-                'arpay_mstr_method'     => $request->payment_method,
-                'arpay_mstr_ref'        => $request->ref_no,
-                'arpay_mstr_createdby'  => auth()->user()->user_mstr_id,
-            ]);
+        DB::transaction(function () use ($request, &$errorMessage) {
+            try {
+                $totalPay = (float)str_replace('.', '', $request->totalPay);
+                // dd($totalPay);
 
-            $totalAllocated = 0;
-
-            // 2. loop AR yang dibayar
-            foreach ($request->items as $item) {
-
-                if ($item['pay_amount'] <= 0) continue;
-
-                $ar = ArMstr::lockForUpdate()->findOrFail($item['ar_id']);
-
-                if ($item['pay_amount'] > $ar->ar_mstr_balance) {
-                    throw new \Exception('Pembayaran melebihi sisa piutang');
-                }
-
-                ArpayDet::create([
-                    'arpay_det_mstrid' => $pay->arpay_mstr_id,
-                    'arpay_det_arid'   => $ar->ar_mstr_id,
-                    'arpay_det_amount' => $item['pay_amount'],
+                // 1. header payment
+                $pay = ArPayMstr::create([
+                    'arpay_mstr_nbr'       => $this->generateArPayNumber(),
+                    'arpay_mstr_date'       => $request->pay_date,
+                    'arpay_mstr_customerid' => $request->customer_id,
+                    'arpay_mstr_amount'     => $totalPay,
+                    'arpay_mstr_method'     => $request->payment_method,
+                    'arpay_mstr_ref'        => $request->ref_no,
+                    'arpay_mstr_createdby'  => auth()->user()->user_mstr_id,
                 ]);
 
-                // update AR
-                $ar->ar_mstr_paid    += $item['pay_amount'];
-                $ar->ar_mstr_balance -= $item['pay_amount'];
+                $totalAllocated = 0;
 
-                $ar->ar_mstr_status = $ar->ar_mstr_balance <= 0
-                    ? 'paid'
-                    : 'partial';
+                // 2. loop AR yang dibayar
+                foreach ($request->items as $item) {
 
-                $ar->save();
+                    if ($item['pay_amount'] <= 0) continue;
 
-                $totalAllocated += $item['pay_amount'];
+                    $ar = ArMstr::lockForUpdate()->findOrFail($item['ar_id']);
 
-                // update sales_mstr_paidamt
-                $sales = SalesMstr::lockForUpdate()->findOrFail($ar->ar_mstr_salesid);
-                // dd($sales);
-                $sales->sales_mstr_paidamt += $item['pay_amount'];
-                $sales->save();
+                    if ($item['pay_amount'] > $ar->ar_mstr_balance) {
+                        throw new \Exception('Pembayaran melebihi sisa piutang');
+                    }
+
+                    ArpayDet::create([
+                        'arpay_det_mstrid' => $pay->arpay_mstr_id,
+                        'arpay_det_arid'   => $ar->ar_mstr_id,
+                        'arpay_det_amount' => $item['pay_amount'],
+                    ]);
+
+                    // update AR
+                    $ar->ar_mstr_paid    += $item['pay_amount'];
+                    $ar->ar_mstr_balance -= $item['pay_amount'];
+
+                    $ar->ar_mstr_status = $ar->ar_mstr_balance <= 0
+                        ? 'paid'
+                        : 'partial';
+
+                    $ar->save();
+
+                    $totalAllocated += $item['pay_amount'];
+
+                    // update sales_mstr_paidamt
+                    $sales = SalesMstr::lockForUpdate()->findOrFail($ar->ar_mstr_salesid);
+                    // dd($sales);
+                    $sales->sales_mstr_paidamt += $item['pay_amount'];
+                    $sales->save();
+                }
+
+                if ($totalAllocated != $totalPay) {
+                    throw new \Exception('Total alokasi tidak sama dengan total pembayaran');
+                }
+
+                FinancialRecords::create([
+                    'amount'      => $totalPay,
+                    'type'        => 'income',
+                    'method'      => $request->payment_method,
+                    'data_source' => 'Ar Payment',
+                    'source_type' => ArpayMstr::class,
+                    'source_id'   => $pay->arpay_mstr_id,
+                    'date'        => now(),
+                    'created_by' => auth()->user()->user_mstr_id,
+
+                ]);
+            } catch (\Exception $e) {
+                $errorMessage = $e->getMessage();
+                DB::rollBack();
             }
-
-            if ($totalAllocated != $totalPay) {
-                throw new \Exception('Total alokasi tidak sama dengan total pembayaran');
-            }
-
-            FinancialRecords::create([
-                'amount'      => $totalPay,
-                'type'        => 'income',
-                'method'      => $request->payment_method,
-                'data_source' => 'Ar Payment',
-                'source_type' => ArpayMstr::class,
-                'source_id'   => $pay->arpay_mstr_id,
-                'date'        => now(),
-                'created_by' => auth()->user()->user_mstr_id,
-
-            ]);
-
-            // jurnal nanti:
-            // Kas / Bank (D)
-            // Piutang Usaha (C)
         });
+
+        // Cek jika ada error yang tertangkap di dalam transaksi
+        if ($errorMessage) {
+            return redirect()->back()->with('error', $errorMessage)->withInput();
+        };
 
         return redirect()->route('ArMstr.index')
             ->with('success', 'Pembayaran piutang berhasil');
