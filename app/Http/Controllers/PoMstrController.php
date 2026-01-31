@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PoDet;
 use App\Models\BpbDet;
 use App\Models\PoMstr;
+use App\Models\LocMstr;
 use App\Models\Product;
 use App\Models\SuppMstr;
 use Illuminate\Http\Request;
@@ -30,18 +31,20 @@ class PoMstrController extends Controller
     public function create()
     {
         $suppliers = SuppMstr::get();
-
-        $locId = auth()->user()->hasRole(['Super Admin', 'Owner']) ? null : 1; // Sesuaikan ambil Loc ID dari session/request
+        $visibleLocIds = LocMstr::where('loc_mstr_isvisible', 1)
+            ->pluck('loc_mstr_id')
+            ->toArray();
+        $isSpecialRole = auth()->user()->hasRole(['Super Admin', 'Owner']);
+        $filterLocs = $isSpecialRole ? null : $visibleLocIds;
 
         $products = Product::where('type', 'single')
-            ->with(['stocks' => function ($q) use ($locId) {
+            ->with(['stocks' => function ($q) use ($filterLocs) {
                 $q->orderBy('created_at', 'asc')
-                    ->when($locId, function ($query) use ($locId) {
-                        return $query->where('loc_id', $locId);
+                    ->when($filterLocs, function ($query) use ($filterLocs) {
+                        return $query->whereIn('loc_id', $filterLocs);
                     });
             }])
             ->get();
-
         // dd($products);
 
         // dd($products);

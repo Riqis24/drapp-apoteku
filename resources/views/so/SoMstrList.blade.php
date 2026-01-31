@@ -85,7 +85,7 @@
 
             });
         </script>
-        <script src="{{ 'assets/js/alert.js' }}"></script>
+        <script src="{{ url('assets/js/alert.js') }}"></script>
         <script>
             function handleDelete(id) {
                 // Sesuaikan dengan nama fungsi di swal-helper kamu, biasanya confirmDelete atau sejenisnya

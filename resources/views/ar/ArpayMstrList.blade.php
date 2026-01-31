@@ -87,6 +87,7 @@
     </div>
 
     @push('scripts')
+        <script src="{{ url('assets/js/alert.js') }}"></script>
         <script>
             $('#customer_id').change(function() {
                 let custid = $(this).val();

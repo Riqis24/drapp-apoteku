@@ -67,6 +67,7 @@
 
 
     @push('scripts')
+        <script src="{{ url('assets/js/alert.js') }}"></script>
         <script>
             let rowIndex = 0;
 
@@ -98,7 +99,7 @@
     <td>
         <select name="items[${rowIndex}][batch_id]"
                 class="form-select batch-select"
-                data-row="${rowIndex}">
+                data-row="${rowIndex}" required>
             <option value="">-- Existing Batch --</option>
         </select>
 
@@ -106,11 +107,11 @@
             <input type="text"
                    name="items[${rowIndex}][batch_no]"
                    class="form-control mb-1"
-                   placeholder="New Batch No">
+                   placeholder="New Batch No" required>
 
             <input type="date"
                    name="items[${rowIndex}][expired_date]"
-                   class="form-control">
+                   class="form-control" required >
         </div>
 
         <div class="form-check mt-1">

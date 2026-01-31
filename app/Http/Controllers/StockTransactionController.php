@@ -175,53 +175,61 @@ class StockTransactionController extends Controller
 
     public function DetStockCard($id)
     {
-        $locId = auth()->user()->hasRole('Super Admin') ? null : 1;
+        // 1. Ambil list ID Lokasi yang visible (isvisible = 1)
+        $visibleLocIds = LocMstr::where('loc_mstr_isvisible', 1)
+            ->pluck('loc_mstr_id')
+            ->toArray();
+
+        // 2. Logika Role: Super Admin/Owner melihat semua, selain itu filter lokasi visible
+        $isSpecialRole = auth()->user()->hasRole(['Super Admin', 'Owner']);
+        $filterLocs = $isSpecialRole ? null : $visibleLocIds;
+
         $product = Product::findOrFail($id);
-        if (!empty($locId)) {
-            $stock = stocks::with('batch')->where('product_id', $id)->where('loc_id', $locId);
-        } else {
-            $stock = stocks::with('batch')->where('product_id', $id);
+
+        // 3. Query Dasar Stok
+        $stockQuery = stocks::with('batch')->where('product_id', $id);
+
+        // Terapkan filter lokasi jika bukan Admin/Owner
+        if ($filterLocs) {
+            $stockQuery->whereIn('loc_id', $filterLocs);
         }
-        $stockAct = (clone $stock)->whereHas('batch', function ($q) {
+
+        // Stok Aktif (Belum Expired)
+        $stockAct = (clone $stockQuery)->whereHas('batch', function ($q) {
             $q->where('batch_mstr_expireddate', '>=', date('Y-m-d'))
                 ->orWhereNull('batch_mstr_expireddate');
         })->get();
-        $stockNonAct = (clone $stock)->whereHas('batch', function ($q) {
+
+        // Stok Non-Aktif (Expired)
+        $stockNonAct = (clone $stockQuery)->whereHas('batch', function ($q) {
             $q->where('batch_mstr_expireddate', '<', date('Y-m-d'));
         })->get();
-        // dd($stockAct);
 
+        // 4. Query Transaksi Stok (History)
         $transactions = StockTransactions::with(['product', 'user', 'location', 'batch', 'source'])
             ->where('product_id', $id)
+            ->when($filterLocs, function ($query) use ($filterLocs) {
+                return $query->whereIn('location_id', $filterLocs);
+            })
             ->orderby('id', 'desc')
             ->paginate(50);
 
-
+        // 5. Mapping Detail (Logika Mapping kamu sudah bagus, tetap dipertahankan)
         $detailsMap = [];
-
         foreach ($transactions as $st) {
-            // Inisialisasi default agar tidak null jika tidak ditemukan detailnya
-            $detailsMap[$st->id] = [
-                'price' => 0,
-                'total' => 0
-            ];
+            $detailsMap[$st->id] = ['price' => 0, 'total' => 0];
 
             if ($st->source && method_exists($st->source, 'details')) {
                 foreach ($st->source->details as $det) {
-                    // Mapping ID produk dari berbagai kemungkinan nama kolom detail
-                    $detPid = $det->sales_det_productid ??
-                        $det->bpb_det_productid ??
-                        $det->sr_det_productid ??
-                        $det->pr_det_productid ??
-                        $det->sa_det_productid ??
-                        $det->ts_det_productid ?? 0;
+                    $detPid = $det->sales_det_productid ?? $det->bpb_det_productid ??
+                        $det->sr_det_productid ?? $det->pr_det_productid ??
+                        $det->sa_det_productid ?? $det->ts_det_productid ?? 0;
 
-                    // Cek kecocokan produk
                     if ($detPid == $st->product_id) {
                         $price = 0;
                         $total = 0;
 
-                        // Logika Penentuan Harga & Total berdasarkan Tipe Model
+                        // Logika perhitungan harga (tetap seperti kode awalmu)
                         if ($st->source_type == \App\Models\SalesMstr::class) {
                             $qtyConv = max($det->sales_det_umconv ?? 1, 1);
                             $price = ($det->sales_det_price ?? 0) / $qtyConv;
@@ -242,18 +250,13 @@ class StockTransactionController extends Controller
                             $total = $det->sa_det_subtotal ?? 0;
                         }
 
-                        // Simpan menggunakan ID Transaksi Stok sebagai Key Unik
-                        $detailsMap[$st->id] = [
-                            'price' => $price,
-                            'total' => $total
-                        ];
-
-                        // Sangat Penting: Stop loop detail jika baris yang cocok sudah ketemu
+                        $detailsMap[$st->id] = ['price' => $price, 'total' => $total];
                         break;
                     }
                 }
             }
         }
+
         return view('report.DetStockCard', compact('transactions', 'detailsMap', 'product', 'stockAct', 'stockNonAct'));
     }
 

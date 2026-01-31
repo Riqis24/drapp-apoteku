@@ -40,6 +40,7 @@
 
 
     @push('scripts')
+        <script src="{{ url('assets/js/alert.js') }}"></script>
         <script>
             let rowIndex = 0;
 

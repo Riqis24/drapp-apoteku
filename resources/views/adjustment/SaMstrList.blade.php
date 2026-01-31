@@ -78,6 +78,7 @@
     </div>
 
     @push('scripts')
+        <script src="{{ url('assets/js/alert.js') }}"></script>
         <script>
             $("#SaTable").DataTable({
                 scrollX: true, // Wajib untuk tabel lebar seperti ini

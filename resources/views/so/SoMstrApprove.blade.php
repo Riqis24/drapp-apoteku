@@ -103,6 +103,7 @@
     </div>
 
     @push('scripts')
+        <script src="{{ url('assets/js/alert.js') }}"></script>
         <script>
             $(document).ready(function() {
                 $("#itemTable").DataTable({

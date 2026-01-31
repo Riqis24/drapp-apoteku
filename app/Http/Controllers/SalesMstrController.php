@@ -245,25 +245,33 @@ class SalesMstrController extends Controller
     public function getHistoryRacik(Request $request)
     {
         $search = $request->q;
-        $role = auth()->user()->hasRole('Kasir');
-        $locId = ($role == 'Kasir') ? 1 : null;
+
+        // 1. Logika Filter Lokasi sesuai permintaan sebelumnya
+        $visibleLocIds = LocMstr::where('loc_mstr_isvisible', 1)
+            ->pluck('loc_mstr_id')
+            ->toArray();
+
+        $isSpecialRole = auth()->user()->hasRole(['Super Admin', 'Owner']);
+        $filterLocs = $isSpecialRole ? null : $visibleLocIds;
+
         $history = SalesDet::query()
             ->with([
                 'measurement',
-                'prescription.details.product' => function ($q) use ($locId) {
-                    // Ambil stok dan harga terbaru dari product_measurements
-                    $q->with(['stocks' => function ($st) use ($locId) {
-                        if (!is_null($locId)) {
-                            $st->where('loc_id', $locId);
-                        }
-                        $st->with('batch');
-                    }, 'productMeasurements' => function ($pm) use ($locId) {
+                'prescription.details.product' => function ($q) use ($filterLocs) {
+                    // Filter stok komponen racikan berdasarkan lokasi isvisible
+                    $q->with(['stocks' => function ($st) use ($filterLocs) {
+                        $st->orderBy('created_at', 'asc')
+                            ->when($filterLocs, function ($query) use ($filterLocs) {
+                                return $query->whereIn('loc_id', $filterLocs);
+                            })
+                            ->with('batch');
+                    }, 'productMeasurements' => function ($pm) {
                         $pm->with(['measurement', 'price']);
                     }]);
                 },
-                'prescription.details.product.productMeasurements.measurement', // Untuk ambil nama satuan di PM
-                'prescription.details.product.productMeasurements.price', // Untuk ambil nama satuan di PM
-                'prescription.details.measurement', // Satuan asli saat resep dibuat
+                'prescription.details.product.productMeasurements.measurement',
+                'prescription.details.product.productMeasurements.price',
+                'prescription.details.measurement',
             ])
             ->where('sales_det_type', 'racikan')
             ->whereHas('prescription', function ($query) use ($search) {
@@ -275,46 +283,49 @@ class SalesMstrController extends Controller
             ->limit(20)
             ->get();
 
-        $response = $history->map(function ($item) use ($locId) {
+        $response = $history->map(function ($item) use ($filterLocs) {
             $pres = $item->prescription;
+            if (!$pres) return null;
 
             return [
-                'id'   => $item->sales_det_id,
-                'pres_um'   => (string)$item->sales_det_um,
-                'pres_umname'   => $item->measurement->name ?? '-',
-                'pres_name' => ($pres->pres_mstr_name ?? 'Racikan') . " (" . $item->sales_det_createdat->format('d/m/Y') . ")",
-                'customData' => [
+                'id'          => $item->sales_det_id,
+                'pres_um'     => (string)$item->sales_det_um,
+                'pres_umname' => $item->measurement->name ?? '-',
+                'pres_name'   => ($pres->pres_mstr_name ?? 'Racikan') . " (" . $item->sales_det_createdat->format('d/m/Y') . ")",
+                'customData'  => [
                     'nama_racikan' => $pres->pres_mstr_name ?? '-',
-                    'pres_id'       => $pres->pres_mstr_id ?? '-',
+                    'pres_id'      => $pres->pres_mstr_id ?? '-',
                     'qty_hasil'    => (float)$pres->pres_mstr_qty ?? 0,
                     'jasa'         => (float)$pres->pres_mstr_fee ?? 0,
                     'markup'       => (float)$pres->pres_mstr_mark ?? 0,
                     'details'      => $pres->details->map(function ($det) {
-                        // Cari data PM yang sesuai
-                        $pm = $det->product->productMeasurements
+                        $product = $det->product;
+
+                        // Cari data PM yang sesuai satuan resep
+                        $pm = $product->productMeasurements
                             ->where('measurement_id', $det->pres_det_um)
                             ->first();
 
-                        // Ambil batch pertama yang tersedia sebagai referensi
-                        $currentBatch = $det->product->stocks->where('quantity', '>', 0)->first();
+                        // Ambil batch pertama yang tersedia di lokasi yang sudah terfilter
+                        $currentBatch = $product->stocks->where('quantity', '>', 0)->first();
 
                         return [
-                            'id'             => $det->pres_det_id, // Digunakan untuk rowId di JS
+                            'id'             => $det->pres_det_id,
                             'product_id'     => $det->pres_det_productid,
-                            'text'           => $det->product->name ?? 'N/A', // Dibaca oleh item.text
-                            'measurement'    => $det->measurement->name ?? '-', // Dibaca oleh item.measurement
+                            'text'           => $product->name ?? 'N/A',
+                            'measurement'    => $det->measurement->name ?? '-',
                             'measurement_id' => $det->pres_det_um,
-                            'stock'          => $det->product->stocks->sum('quantity') ?? 0,
+                            'stock'          => (float)$product->stocks->sum('quantity'),
                             'price'          => $pm && $pm->price ? (float)$pm->price->price : (float)$det->pres_det_price,
-                            'batch_number'   => $currentBatch->batch->batch_mstr_no ?? '-', // Dibaca oleh item.batch_number
-                            'qty'            => (float)$det->pres_det_qty, // Nilai qty dari history
+                            'batch_number'   => $currentBatch->batch->batch_mstr_no ?? '-',
+                            'qty'            => (float)$det->pres_det_qty,
                         ];
                     })
                 ]
             ];
-        });
+        })->filter(); // Menghapus hasil null jika ada data yang corrupt
 
-        return response()->json($response);
+        return response()->json($response->values());
     }
     /**
      * Display a listing of the resource.
@@ -993,7 +1004,7 @@ class SalesMstrController extends Controller
             throw new \Exception("Stok negatif telah diizinkan, namun stok fisik untuk produk ID {$productId} di lokasi ID {$locId} sudah habis.");
         }
 
-        return $usedBatches; 
+        return $usedBatches;
     }
 
 

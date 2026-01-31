@@ -88,6 +88,7 @@
     </div>
 
     @push('scripts')
+        <script src="{{ url('assets/js/alert.js') }}"></script>
         <script>
             $('#supplier_id').change(function() {
                 let suppid = $(this).val();

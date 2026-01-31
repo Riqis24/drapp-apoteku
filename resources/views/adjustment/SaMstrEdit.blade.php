@@ -123,4 +123,9 @@
 
         </div>
     </div>
+
+    @push('scripts')
+        <script src="{{ url('assets/js/alert.js') }}"></script>
+    @endpush
+
 </x-app-layout>

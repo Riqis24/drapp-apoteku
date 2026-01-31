@@ -50,64 +50,83 @@ class SaMstrController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request->all());
-        DB::transaction(function () use ($request) {
+        // 1. Validasi Input (Sebaiknya gunakan FormRequest)
+        $request->validate([
+            'loc_id' => 'required',
+            'items'  => 'required|array',
+            'items.*.product_id'   => 'required',
+            'items.*.qty_physical' => 'required|numeric',
+        ]);
 
-            $sa = SaMstr::create([
-                'sa_mstr_nbr'       => $this->generateSaNumber(),
-                'sa_mstr_date'      => now(),
-                'sa_mstr_locid'     => $request->loc_id,
-                'sa_mstr_ref'       => $request->ref,
-                'sa_mstr_reason'    => $request->reason,
-                'sa_mstr_status'    => 'draft',
-                'sa_mstr_createdby' => auth()->user()->user_mstr_id,
-            ]);
-            // dd($sa);
-
-            foreach ($request->items as $item) {
-
-                $qtySystem   = $item['qty_system'] ?? 0;
-                $qtyPhysical = $item['qty_physical'];
-                $qtyDiff     = $qtyPhysical - $qtySystem;
-
-                // ======================
-                // GET / CREATE BATCH
-                // ======================
-                if (!empty($item['batch_id'])) {
-                    $batchId = $item['batch_id'];
-                } else {
-                    if (empty($item['batch_no']) || empty($item['expired_date'])) {
-                        throw new \Exception('Batch & expired wajib diisi');
-                    }
-
-                    $batch = BatchMstr::firstOrCreate(
-                        [
-                            'batch_mstr_productid' => $item['product_id'],
-                            'batch_mstr_no'   => $item['batch_no'],
-                        ],
-                        [
-                            'batch_mstr_expireddate' => $item['expired_date'],
-                        ]
-                    );
-
-                    $batchId = $batch->batch_mstr_id;
-                }
-
-
-                SaDet::create([
-                    'sa_det_mstrid'      => $sa->sa_mstr_id,
-                    'sa_det_productid'   => $item['product_id'],
-                    'sa_det_batchid'     => $batchId,
-                    'sa_det_qtysystem'   => $qtySystem,
-                    'sa_det_qtyphysical' => $qtyPhysical,
-                    'sa_det_qtydiff'    => $qtyDiff,
-                    'sa_det_note'        => $item['note'] ?? null,
+        try {
+            DB::transaction(function () use ($request) {
+                // 2. Simpan Master Stock Adjustment
+                $sa = SaMstr::create([
+                    'sa_mstr_nbr'       => $this->generateSaNumber(),
+                    'sa_mstr_date'      => now(),
+                    'sa_mstr_locid'     => $request->loc_id,
+                    'sa_mstr_ref'       => $request->ref,
+                    'sa_mstr_reason'    => $request->reason,
+                    'sa_mstr_status'    => 'draft',
+                    'sa_mstr_createdby' => auth()->user()->user_mstr_id,
                 ]);
-            }
-        });
 
-        return redirect()->route('SaMstr.index')
-            ->with('success', 'Stock Adjustment draft saved');
+                foreach ($request->items as $item) {
+                    $qtySystem   = $item['qty_system'] ?? 0;
+                    $qtyPhysical = $item['qty_physical'];
+                    $qtyDiff     = $qtyPhysical - $qtySystem;
+
+                    // 3. Logika Batching
+                    $batchId = $this->resolveBatchId($item);
+
+                    // 4. Simpan Detail
+                    SaDet::create([
+                        'sa_det_mstrid'      => $sa->sa_mstr_id,
+                        'sa_det_productid'   => $item['product_id'],
+                        'sa_det_batchid'     => $batchId,
+                        'sa_det_qtysystem'   => $qtySystem,
+                        'sa_det_qtyphysical' => $qtyPhysical,
+                        'sa_det_qtydiff'     => $qtyDiff,
+                        'sa_det_note'        => $item['note'] ?? null,
+                    ]);
+                }
+            });
+
+            return redirect()->route('SaMstr.index')
+                ->with('success', 'Stock Adjustment draft saved');
+        } catch (\Exception $e) {
+            // Jika terjadi error, transaksi akan otomatis rollback
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Fungsi pembantu untuk mengelola Batch ID
+     */
+    private function resolveBatchId(array $item)
+    {
+        if (!empty($item['batch_id'])) {
+            return $item['batch_id'];
+        }
+
+        if (empty($item['batch_no']) || empty($item['expired_date'])) {
+            // Melempar exception agar transaksi melakukan rollback secara otomatis
+            throw new \Exception("Batch dan Expired Date untuk produk ID {$item['product_id']} harus diisi.");
+        }
+
+        $batch = BatchMstr::firstOrCreate(
+            [
+                'batch_mstr_productid' => $item['product_id'],
+                'batch_mstr_no'        => $item['batch_no'],
+            ],
+            [
+                'batch_mstr_expireddate' => $item['expired_date'],
+            ]
+        );
+
+        return $batch->batch_mstr_id;
     }
 
 

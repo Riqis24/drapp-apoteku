@@ -139,7 +139,7 @@ class SoMstrController extends Controller
         if ($so->so_mstr_status !== 'draft') {
             abort(403, 'Opname sudah dikunci');
         }
-        dd($request->all(), $id);
+        // dd($request->all(), $id);
 
 
         foreach ($request->details as $detId => $row) {
@@ -209,13 +209,12 @@ class SoMstrController extends Controller
                             'loc_id'      => $sa->sa_mstr_locid,
                             'batch_id'    => $det->sa_det_batchid,
                             'type'        => $reverseQty > 0 ? 'in' : 'out',
-                            'quantity'    => abs($reverseQty),
+                            'quantity'    => $reverseQty,
                             'source_type' => SoMstr::class, // Tandai sebagai Void
                             'source_id'   => $so->so_mstr_id,
                             'note'        => 'Void Stock Opname - Reversal of Adjustment (' . $so->so_mstr_nbr . ')',
                             'date'        => now(),
                             'created_by' => auth()->user()->user_mstr_id,
-
                         ]);
                     }
 
@@ -241,7 +240,6 @@ class SoMstrController extends Controller
 
     public function deleteDetails(Request $request, SoMstr $so)
     {
-
         // dd($request->all());
         if ($so->so_mstr_status !== 'draft') {
             abort(403, 'Stock opname sudah dikunci');
