@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <title>Cetak Tutup Kasir - {{ $data['kasir'] }}</title>
     <style>
-        /* CSS KHUSUS UNTUK PRINTER THERMAL 58mm */
         @page {
             margin: 0;
         }
@@ -13,10 +12,8 @@
         body {
             font-family: 'Courier New', Courier, monospace;
             font-size: 9pt;
-            /* Ukuran sedikit diperbesar agar terbaca di kertas thermal */
             line-height: 1.2;
             width: 48mm;
-            /* Lebar area cetak efektif printer 58mm biasanya 48mm */
             color: #000;
             margin: 0;
             padding: 5px;
@@ -69,29 +66,19 @@
             margin-top: 10px;
             font-size: 8pt;
         }
-
-        /* Memaksa browser menyembunyikan elemen non-cetak jika ada */
-        @media print {
-            .no-print {
-                display: none;
-            }
-
-            body {
-                width: 48mm;
-            }
-        }
     </style>
 </head>
 
 <body>
     <div class="text-center">
-        <span class="fw-bold" style="font-size: 11pt;">{{ $apotek->name }}</span><br>
+        <span class="fw-bold" style="font-size: 11pt;">{{ $apotek->name ?? 'Apotek' }}</span><br>
         Kasir: {{ $data['kasir'] ?? '-' }}<br>
         {{ $data['tanggal'] }}
     </div>
 
     <div class="divider"></div>
 
+    {{-- BAGIAN 1: RINGKASAN PENJUALAN --}}
     <table class="item-table">
         <tr>
             <td>Bruto</td>
@@ -106,20 +93,21 @@
             <td class="text-right">{{ rupiah($data['ppn']) }}</td>
         </tr>
         <tr class="fw-bold grand-total">
-            <td>OMZET</td>
+            <td>OMZET (Net)</td>
             <td class="text-right">{{ rupiah($data['omzet']) }}</td>
         </tr>
     </table>
 
     <div class="divider"></div>
 
+    {{-- BAGIAN 2: RINCIAN METODE BAYAR (SISTEM) --}}
     <table class="item-table">
         <tr>
-            <td>Modal awal</td>
+            <td>Modal Awal</td>
             <td class="text-right">{{ rupiah($activeSession->opening_amount) }}</td>
         </tr>
         <tr>
-            <td>Laci (Cash)</td>
+            <td>Tunai</td>
             <td class="text-right">{{ rupiah($data['cash']) }}</td>
         </tr>
         <tr>
@@ -131,34 +119,47 @@
             <td class="text-right">{{ rupiah($data['transfer']) }}</td>
         </tr>
         <tr>
-            <td>C/D Card</td>
+            <td>Kartu C/D</td>
             <td class="text-right">{{ rupiah($data['creditcard']) }}</td>
         </tr>
-    </table>
-
-    <div class="divider"></div>
-    <table>
-        <tr>
-            <td>Total Uang</td>
+        <tr class="fw-bold">
+            <td>TOTAL SISTEM</td>
             <td class="text-right">{{ rupiah($activeSession->opening_amount + $data['ttlTransactions']) }}</td>
         </tr>
     </table>
+
     <div class="divider"></div>
 
+    {{-- BAGIAN 3: PERBANDINGAN FISIK & SELISIH --}}
+    <table class="item-table">
+        <tr class="fw-bold">
+            <td>TOTAL FISIK</td>
+            <td class="text-right">{{ rupiah($activeSession->closing_amount) }}</td>
+        </tr>
+        <tr>
+            <td>SELISIH</td>
+            <td class="text-right">
+                @php $selisih = $activeSession->closing_amount - ($activeSession->opening_amount + $data['ttlTransactions']); @endphp
+                {{ $selisih > 0 ? '+' : '' }}{{ rupiah($selisih) }}
+            </td>
+        </tr>
+    </table>
+
+    <div class="divider"></div>
 
     <div class="text-center footer">
-        {{ now()->format('d/m/Y H:i:s') }}<br>
+        Waktu Cetak: {{ now()->format('d/m/Y H:i:s') }}<br>
         -- LAPORAN TUTUP KASIR --
-        <br><br>.
+        <br><br>
+        (....................)<br>
+        Tanda Tangan Kasir
     </div>
 
     <script>
         window.onload = function() {
             window.print();
-
-            // Memberikan jeda sebelum menutup window otomatis (jika dibuka via tab baru)
             window.onafterprint = function() {
-                // window.close(); // Aktifkan jika ingin tab otomatis tertutup setelah print selesai/batal
+                window.close();
             };
         }
     </script>

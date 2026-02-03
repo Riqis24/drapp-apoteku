@@ -126,7 +126,7 @@ class BpbMstrController extends Controller
             ->select([
                 'product_measurements.id as pm_id',
                 'product_measurements.last_buy_price as last_bp',
-                'product_measurements.conversion',
+                'product_measurements.conversion as conversion',
                 'measurements.id as measurement_id',
                 'measurements.name as unit_name',
                 'prices.price as old_sell_price' // Ini adalah Hrg Jual Lama

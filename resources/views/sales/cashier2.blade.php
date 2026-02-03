@@ -2970,19 +2970,39 @@
 
                     Swal.fire({
                         title: 'Konfirmasi Tutup Kasir',
-                        text: "Apakah Anda yakin ingin menutup kasir sekarang? Laporan rekap akan dicetak otomatis.",
+                        html: `
+                <p>Masukkan total uang fisik di laci (Cash):</p>
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Rp</span>
+                    <input type="number" id="swal-closing-amount" class="form-control" placeholder="0" autofocus>
+                </div>
+                <small class="text-muted">Laporan rekap akan dicetak otomatis setelah konfirmasi.</small>
+            `,
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#28a745',
                         cancelButtonColor: '#d33',
                         confirmButtonText: 'Ya, Tutup & Cetak!',
-                        cancelButtonText: 'Batal'
+                        cancelButtonText: 'Batal',
+                        preConfirm: () => {
+                            const amount = Swal.getPopup().querySelector('#swal-closing-amount')
+                                .value;
+                            if (!amount || amount < 0) {
+                                Swal.showValidationMessage(
+                                    `Silakan masukkan nominal uang fisik yang valid`);
+                            }
+                            return {
+                                closing_amount: amount
+                            };
+                        }
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            // Tampilkan loading saat proses
+                            const closingAmount = result.value.closing_amount;
+
+                            // Tampilkan loading
                             Swal.fire({
                                 title: 'Memproses...',
-                                text: 'Sedang mengunci transaksi dan membuat PDF',
+                                text: 'Sedang menghitung selisih dan mengunci transaksi',
                                 allowOutsideClick: false,
                                 didOpen: () => {
                                     Swal.showLoading();
@@ -2990,19 +3010,19 @@
                             });
 
                             $.ajax({
-                                url: "{{ route('CashierSession.close') }}", // Sesuaikan nama route-mu
+                                url: "{{ route('CashierSession.close') }}",
                                 method: "POST",
                                 data: {
                                     _token: "{{ csrf_token() }}",
-                                    loc: loc
+                                    loc: loc,
+                                    closing_amount: closingAmount // Mengirimkan uang fisik ke backend
                                 },
                                 success: function(response) {
                                     if (response.success) {
                                         Swal.close();
 
                                         // Buka tab baru untuk print
-                                        let printWindow = window.open(response.print_url,
-                                            '_blank');
+                                        window.open(response.print_url, '_blank');
 
                                         Swal.fire({
                                             icon: 'success',
@@ -3010,14 +3030,14 @@
                                             text: 'Mencetak rekap...',
                                             timer: 2000
                                         }).then(() => {
-                                            window.location
-                                                .reload(); // Refresh halaman kasir
+                                            window.location.reload();
                                         });
                                     }
                                 },
                                 error: function(xhr) {
-                                    Swal.fire('Error!', 'Terjadi kesalahan pada server.',
-                                        'error');
+                                    let msg = xhr.responseJSON ? xhr.responseJSON.message :
+                                        'Terjadi kesalahan pada server.';
+                                    Swal.fire('Error!', msg, 'error');
                                 }
                             });
                         }

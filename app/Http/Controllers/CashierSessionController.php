@@ -60,68 +60,79 @@ class CashierSessionController extends Controller
     }
 
     // tutup kasir
-    // public function closeCashier(Request $request)
-    // {
-    //     $activeSession = CashierSession::where('user_id', auth()->user()->user_mstr_id)
-    //         ->where('loc_id', $request->close_loc_id)
-    //         ->where('status', 'open')
-    //         ->latest('opened_at')
-    //         ->first();
-
-    //     if (!$activeSession) {
-    //         // return response()->json(['error' => 'Tidak ada session kasir aktif'], 400);
-    //         return redirect()
-    //             ->back()
-    //             ->with('swal', [
-    //                 'icon' => 'warning',
-    //                 'title' => 'Warning',
-    //                 'text' => 'Tidak ada session kasir aktif'
-    //             ]);
-    //     }
-
-    //     if ($activeSession->status === 'closed') {
-    //         return redirect()
-    //             ->back()
-    //             ->with('swal', [
-    //                 'icon' => 'warning',
-    //                 'title' => 'Warning',
-    //                 'text' => 'Session sudah ditutup'
-    //             ]);
-    //     }
-
-    //     // hitung total transaksi yang dibayar
-    //     $transactions_total = SalesMstr::where('cashier_session_id', $activeSession->id)
-    //         ->where('sales_mstr_status', 'posted')
-    //         ->sum('sales_mstr_subtotal');
-
-    //     $discrepancy = ($request->closing_amount ?? 0) - ($activeSession->opening_amount + $transactions_total);
-
-    //     $activeSession->update([
-    //         'closing_amount' => $request->closing_amount ?? 0,
-    //         'transactions_total' => $transactions_total,
-    //         'discrepancy' => $discrepancy,
-    //         'status' => 'closed',
-    //         'closed_at' => now(),
-    //     ]);
-
-    //     // otomatis buat financial record untuk selisih
-    //     if ($discrepancy != 0) {
-    //         FinancialRecords::create([
-    //             'amount' => abs($discrepancy),
-    //             'type' => $discrepancy > 0 ? 'income' : 'expense',
-    //             'data_source' => 'Kas Selisih',
-    //             'source_type' => CashierSession::class,
-    //             'source_id' => $activeSession->id,
-    //             'date' => now()
-    //         ]);
-    //     }
-
-
-
-    //     return redirect()->back()->with('success', 'Thank You, Today is Done 😁');
-    // }
-
     public function close(Request $request)
+    {
+        // dd($request->all());
+        DB::beginTransaction();
+        try {
+            $activeSession = CashierSession::where('user_id', auth()->user()->user_mstr_id)
+                ->where('loc_id', $request->loc)
+                ->where('status', 'open')
+                ->latest('opened_at')
+                ->first();
+
+            if (!$activeSession) {
+                // return response()->json(['error' => 'Tidak ada session kasir aktif'], 400);
+                return redirect()
+                    ->back()
+                    ->with('swal', [
+                        'icon' => 'warning',
+                        'title' => 'Warning',
+                        'text' => 'Tidak ada session kasir aktif'
+                    ]);
+            }
+
+            if ($activeSession->status === 'closed') {
+                return redirect()
+                    ->back()
+                    ->with('swal', [
+                        'icon' => 'warning',
+                        'title' => 'Warning',
+                        'text' => 'Session sudah ditutup'
+                    ]);
+            }
+
+            // hitung total transaksi yang dibayar
+            $transactions_total = SalesMstr::where('cashier_session_id', $activeSession->id)
+                ->where('sales_mstr_status', 'posted')
+                ->sum('sales_mstr_subtotal');
+
+            $discrepancy = ($request->closing_amount ?? 0) - ($activeSession->opening_amount + $transactions_total);
+
+            $activeSession->update([
+                'closing_amount' => $request->closing_amount ?? 0,
+                'transactions_total' => $transactions_total,
+                'discrepancy' => $discrepancy,
+                'status' => 'closed',
+                'closed_at' => now(),
+            ]);
+
+            // otomatis buat financial record untuk selisih
+            if ($discrepancy != 0) {
+                FinancialRecords::create([
+                    'amount' => abs($discrepancy),
+                    'type' => $discrepancy > 0 ? 'income' : 'expense',
+                    'data_source' => 'Kas Selisih',
+                    'source_type' => CashierSession::class,
+                    'source_id' => $activeSession->id,
+                    'date' => now()
+                ]);
+            }
+
+            DB::commit();
+
+            // Kirim URL ke route khusus yang menampilkan view print
+            return response()->json([
+                'success' => true,
+                'print_url' => route('CashierSession.print', $activeSession->id)
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function closeCashier(Request $request)
     {
         DB::beginTransaction();
         try {
@@ -200,6 +211,14 @@ class CashierSessionController extends Controller
 
         $ttlTransactions = $cash + $transfer + $qris + $creditcard;
 
+        $totalSistem = $activeSession->opening_amount + $ttlTransactions;
+
+        // Ambil input fisik yang diisi kasir saat tutup
+        $totalFisik = $activeSession->closing_amount;
+
+        // Hitung Selisih (Gunakan nilai yang sudah ada di DB atau hitung ulang)
+        $selisih = $totalFisik - $totalSistem;
+
         // Piutang: Semua nota yang BELUM bayar lunas
         $totalPiutang = $sales->sum(function ($item) {
             return $item->sales_mstr_grandtotal - $item->sales_mstr_paidamt;
@@ -215,18 +234,25 @@ class CashierSessionController extends Controller
             'ppn'       => $ppn,
             'cash'     => $cash,
             'qris'     => $qris,
-            'ttlTransactions'     => $ttlTransactions,
+            'ttlTransactions'  => $ttlTransactions,
             'creditcard'     => $creditcard,
             'transfer'     => $transfer,
             'piutang'   => $totalPiutang,
             'count'     => $sales->count(),
             'apotek'    => $apotek,
+
+            // Data untuk Compare
+            'modal_awal'   => $activeSession->opening_amount,
+            'total_sistem' => $totalSistem,
+            'total_fisik'  => $totalFisik,
+            'selisih'      => $selisih
         ];
 
         // dd($data);
 
         return view('sales.tutupkasir', compact('activeSession', 'apotek', 'sales', 'data'));
     }
+
 
     public function cashier()
     {

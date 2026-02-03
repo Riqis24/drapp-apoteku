@@ -949,18 +949,38 @@
                     </td>
                     
                     <td>
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text">Rp</span>
-                            <input type="number" class="form-control text-end fw-bold new-sell-price" 
-                                   data-pmid="${m.pm_id}" 
-                                   value="${Math.round(hrgJualBaru)}">
-                        </div>
+                        <input type="number" 
+                            class="form-control text-end fw-bold new-sell-price price-input" 
+                            data-conversion="${m.conversion}" 
+                            data-pmid="${m.pm_id}" 
+                            value="${Math.round(hrgJualBaru)}">
                     </td>
                 </tr>`;
                     });
                     $('#priceUpdateContent').html(html);
                 });
             }
+
+            // $(document).on('input', '.price-input', function() {
+            //     let currentInput = $(this);
+            //     let newVal = parseFloat(currentInput.val()) || 0;
+            //     let currentConversion = parseFloat(currentInput.data('conversion')) || 1;
+
+            //     // 1. Hitung harga dasar (untuk konversi 1)
+            //     let basePrice = newVal / currentConversion;
+
+            //     // 2. Update semua input lainnya di dalam tabel yang sama
+            //     $('.price-input').each(function() {
+            //         let targetInput = $(this);
+
+            //         // Jangan update input yang sedang diketik user agar kursor tidak lari
+            //         if (!targetInput.is(currentInput)) {
+            //             let targetConversion = parseFloat(targetInput.data('conversion'));
+            //             let calculatedPrice = Math.round(basePrice * targetConversion);
+            //             targetInput.val(calculatedPrice);
+            //         }
+            //     });
+            // });
         </script>
         <script>
             // Ganti tag <button> simpan di HTML kamu menjadi:
