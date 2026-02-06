@@ -330,9 +330,22 @@ class SalesMstrController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $transactions = SalesMstr::with('loc')->orderBy('sales_mstr_id', 'desc')->get();
+        $transactions = SalesMstr::with('loc')->orderBy('sales_mstr_id', 'desc')->get(); // Inisialisasi query
+        $query = SalesMstr::with('loc'); // Sesuaikan dengan nama model Anda
+
+        // Filter berdasarkan tanggal jika ada input
+        $query->when($request->start_date, function ($q) use ($request) {
+            return $q->whereDate('sales_mstr_createdat', '>=', $request->start_date);
+        });
+
+        $query->when($request->end_date, function ($q) use ($request) {
+            return $q->whereDate('sales_mstr_createdat', '<=', $request->end_date);
+        });
+
+        // Ambil data dengan urutan terbaru
+        $transactions = $query->orderBy('sales_mstr_createdat', 'desc')->get();
         return view('sales.SalesMstrList', compact('transactions'));
     }
 

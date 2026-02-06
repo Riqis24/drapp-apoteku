@@ -55,7 +55,7 @@
                     </div>
                 </div>
                 <div class="card-footer">
-                    ini footer
+
                 </div>
             </div>
         </div>

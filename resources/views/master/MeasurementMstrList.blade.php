@@ -6,14 +6,14 @@
             </a>
         </header>
         <div class="page-heading">
-            <h3>Measurement Master</h3>
+            <h3>Master Satuan</h3>
         </div>
         <div class="page-content">
             <div class="card">
                 <div class="card-header">
                     <button class="btn btn-outline-primary btn-sm rounded" type="button" data-bs-toggle="modal"
                         data-bs-target="#modalAddMeasurement">
-                        Add Measurement
+                        Tambah Satuan
                     </button>
                 </div>
                 <div class="card-body">
@@ -23,10 +23,10 @@
                             <thead class="table-dark">
                                 <tr>
                                     <th style="width:5%; text-align: center">No</th>
-                                    <th style="text-align: center">Name</th>
+                                    <th style="text-align: center">Nama</th>
                                     {{-- <th>Role</th> --}}
                                     {{-- <th>Status</th> --}}
-                                    {{-- <th>Aksi</th> --}}
+                                    <th style="width:5%;">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -34,6 +34,24 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $measurement->name }}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-warning editBtn"
+                                                data-id="{{ $measurement->id }}" data-name="{{ $measurement->name }}"
+                                                data-bs-toggle="modal" data-bs-target="#modalEditMeasurement">
+                                                <i class="bi bi-pen" style="font-size: 12px"></i>
+                                            </button>
+
+                                            <form action="{{ route('MeasurementMstr.destroy', $measurement->id) }}"
+                                                method="POST" id="delete-form-{{ $measurement->id }}"
+                                                style="display: inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" class="btn btn-sm btn-danger deleteBtn"
+                                                    onclick="confirmDelete('{{ $measurement->id }}')">
+                                                    <i class="bi bi-trash" style="font-size: 12px"></i>
+                                                </button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -41,7 +59,7 @@
                     </div>
                 </div>
                 <div class="card-footer">
-                    ini footer
+
                 </div>
             </div>
         </div>
@@ -84,8 +102,67 @@
         </div>
     </form>
 
+    <div class="modal fade" id="modalEditMeasurement" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="editForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Satuan</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Nama</label>
+                            <input type="text" name="name" id="edit_meas_name" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Update Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     @push('scripts')
         <script src="{{ 'assets/js/MeasurementMstr/getData.js' }}"></script>
         <script src="{{ 'assets/js/alert.js' }}"></script>
+        <script>
+            // --- LOGIC EDIT MODAL ---
+            $(document).on('click', '.editBtn', function() {
+                let id = $(this).data('id');
+                let name = $(this).data('name'); // Ambil data dari attribute button
+
+                // Isi value input di modal
+                $('#edit_meas_name').val(name);
+
+                // Ubah action form secara dinamis
+                let url = "{{ route('MeasurementMstr.update', ':id') }}";
+                url = url.replace(':id', id);
+                $('#editForm').attr('action', url);
+            });
+
+            // --- LOGIC DELETE SWEETALERT ---
+            function confirmDelete(id) {
+                Swal.fire({
+                    title: 'Apakah anda yakin?',
+                    text: "Data yang dihapus tidak dapat dikembalikan!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Submit form hapus yang sesuai ID
+                        document.getElementById('delete-form-' + id).submit();
+                    }
+                })
+            }
+        </script>
     @endpush
 </x-app-layout>

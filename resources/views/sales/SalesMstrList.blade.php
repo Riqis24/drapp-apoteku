@@ -13,6 +13,31 @@
                 <div class="card-header">
                 </div>
                 <div class="card-body">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <form action="{{ route('SalesMstr.index') }}" method="GET"
+                                class="row g-3 align-items-end">
+                                <div class="col-md-3">
+                                    <label class="form-label">Dari Tanggal</label>
+                                    <input type="date" name="start_date" class="form-control form-control-sm"
+                                        value="{{ request('start_date') }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Sampai Tanggal</label>
+                                    <input type="date" name="end_date" class="form-control form-control-sm"
+                                        value="{{ request('end_date') }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-filter"></i> Filter
+                                    </button>
+                                    <a href="{{ route('SalesMstr.index') }}" class="btn btn-sm btn-secondary">
+                                        <i class="bi bi-arrow-clockwise"></i> Reset
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table id="SalesTable" class="table table-striped table-bordered table-sm nowrap">
                             <thead class="table-dark">
@@ -41,7 +66,8 @@
                                         </td>
                                         <td style="text-align: right">{{ rupiah($transaction->sales_mstr_discamt) }}
                                         </td>
-                                        <td style="text-align: right">{{ rupiah($transaction->sales_mstr_ppnamt) }}</td>
+                                        <td style="text-align: right">{{ rupiah($transaction->sales_mstr_ppnamt) }}
+                                        </td>
                                         <td style="text-align: right">{{ rupiah($transaction->sales_mstr_grandtotal) }}
                                         </td>
                                         <td>{{ $transaction->sales_mstr_status }}</td>

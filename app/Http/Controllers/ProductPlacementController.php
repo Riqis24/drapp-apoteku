@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\ProductPlacement;
 use App\Http\Requests\StoreProductPlacementRequest;
 use App\Http\Requests\UpdateProductPlacementRequest;
+use App\Models\ProductMeasurements;
 
 class ProductPlacementController extends Controller
 {
@@ -60,16 +61,38 @@ class ProductPlacementController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateProductPlacementRequest $request, ProductPlacement $productPlacement)
+    public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'code' => 'required',
+            'name' => 'required',
+            'description' => 'required',
+        ]);
+
+        $check = ProductMeasurements::where('placement_id', $id)->first();
+        if ($check) {
+            return redirect()->back()->with('error', 'Lokasi Sudah Digunakan di Product Measurements, Tidak Bisa Diubah!');
+        }
+
+        $placement = ProductPlacement::findOrFail($id);
+        $placement->update([
+            'code' => $request->code,
+            'name' => $request->name,
+            'description' => $request->description,
+        ]);
+
+        return redirect()->back()->with('success', 'Data updated successfully!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(ProductPlacement $productPlacement)
+    public function destroy($id)
     {
-        //
+        $check = ProductMeasurements::where('placement_id', $id)->first();
+        if ($check) {
+            return redirect()->back()->with('error', 'Lokasi Sudah Digunakan di Product Measurements, Tidak Bisa Diubah!');
+        }
+        $placement = ProductPlacement::findOrFail($id);
+        $placement->delete();
+
+        return redirect()->back()->with('success', 'Data deleted successfully!');
     }
 }

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreMeasurementRequest;
 use Illuminate\Validation\ValidationException;
 use App\Http\Requests\UpdateMeasurementRequest;
+use App\Models\ProductMeasurements;
 
 class MeasurementController extends Controller
 {
@@ -78,16 +79,45 @@ class MeasurementController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateMeasurementRequest $request, Measurement $measurement)
+    public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        if (Measurement::where('name', $request->name)->where('id', '!=', $id)->exists()) {
+            return redirect()->back()->with('error', 'Nama satuan sudah digunakan.');
+        }
+
+        try {
+            $data = Measurement::findOrFail($id);
+            $data->update([
+                'name' => $request->name,
+            ]);
+
+            return redirect()->back()->with('success', 'Data berhasil diperbarui!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal memperbarui data.');
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Measurement $measurement)
+    public function destroy($id)
     {
-        //
+        $check = ProductMeasurements::where('measurement_id', $id)->first();
+        if ($check) {
+            return redirect()->back()->with('error', 'Data gagal dihapus atau masih digunakan di tabel lain.');
+        }
+
+        try {
+            $data = Measurement::findOrFail($id);
+            $data->delete();
+
+            return redirect()->back()->with('success', 'Data berhasil dihapus!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Data gagal dihapus atau masih digunakan di tabel lain.');
+        }
     }
 }
