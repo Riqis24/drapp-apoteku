@@ -22,9 +22,19 @@ use App\Models\SuppMstr;
 
 class BpbMstrController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $bpb = BpbMstr::with(['supplier', 'po', 'location', 'user'])->orderByDesc('bpb_mstr_id')->get();
+        $query = BpbMstr::with(['supplier', 'po', 'location', 'user']);
+        $query->when($request->start_date, function ($q) use ($request) {
+            return $q->whereDate('bpb_mstr_createdat', '>=', $request->start_date);
+        });
+
+        $query->when($request->end_date, function ($q) use ($request) {
+            return $q->whereDate('bpb_mstr_createdat', '<=', $request->end_date);
+        });
+
+        $bpb = $query->get();
+
         return view('bpb.BpbMstrList', compact('bpb'));
     }
 

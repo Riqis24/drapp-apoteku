@@ -78,13 +78,16 @@
             </li>
         @endrole
         <li
-            class="sidebar-item has-sub {{ Request::is('StockTransaction*', 'Stock/*', 'FinancialRecord*', 'ApMstr/SuppStatement*', 'ApMstr/Aging*') ? 'active' : '' }}">
+            class="sidebar-item has-sub {{ Request::is('StockTransaction*', 'Stock/*', 'FinancialRecord*', 'ApMstr/SuppStatement*', 'ApMstr/Aging*', 'SummaryStockCard*') ? 'active' : '' }}">
             <a href="#" class="sidebar-link">
                 <i class="bi bi-journals"></i>
                 <span>Report</span>
             </a>
+
             <ul
-                class="submenu {{ Request::is('StockTransaction*', 'Stock/*', 'FinancialRecord*', 'ApMstr/SuppStatement*', 'ApMstr/Aging*', 'SummaryStockCard', 'StockTransaction.StockCard', 'StockTransaction.DetStockCard') ? 'active' : '' }}">
+                class="submenu {{ Request::is('StockTransaction*', 'Stock/*', 'FinancialRecord*', 'ApMstr/SuppStatement*', 'ApMstr/Aging*', 'SummaryStockCard*') ? 'active' : '' }}">
+
+                {{-- Menu Khusus Admin/Owner --}}
                 @role(['Super Admin', 'Admin', 'Owner'])
                     <li class="submenu-item {{ Route::is('ApMstr.SuppStatement') ? 'active' : '' }}">
                         <a href="{{ route('ApMstr.SuppStatement') }}" class="submenu-link">Lap. Rekening Pemasok</a>
@@ -93,8 +96,10 @@
                         <a href="{{ route('ApMstr.AgingHutang') }}" class="submenu-link">Umur Hutang</a>
                     </li>
                 @endrole
-                <li class="submenu-item {{ Route::is('StockTransaction.*') ? 'active' : '' }}">
-                    <a href="{{ route('StockTransaction.index') }}" class="submenu-link">Transaksi histori</a>
+
+                {{-- Menu Umum --}}
+                <li class="submenu-item {{ Route::is('StockTransaction.index') ? 'active' : '' }}">
+                    <a href="{{ route('StockTransaction.index') }}" class="submenu-link">Transaksi Histori</a>
                 </li>
                 <li class="submenu-item {{ Route::is('Stock.index') ? 'active' : '' }}">
                     <a href="{{ route('Stock.index') }}" class="submenu-link">Stok Obat</a>
@@ -103,8 +108,10 @@
                     <a href="{{ route('StockTransaction.StockCard') }}" class="submenu-link">Kartu Stok</a>
                 </li>
                 <li class="submenu-item {{ Route::is('SummaryStockCard') ? 'active' : '' }}">
-                    <a href="{{ route('SummaryStockCard') }}" class="submenu-link">kartu Stok (Rekap)</a>
+                    <a href="{{ route('SummaryStockCard') }}" class="submenu-link">Kartu Stok (Rekap)</a>
                 </li>
+
+                {{-- Menu Finansial Khusus Admin/Owner --}}
                 @role(['Super Admin', 'Admin', 'Owner'])
                     <li class="submenu-item {{ Route::is('FinancialRecord.*') ? 'active' : '' }}">
                         <a href="{{ route('FinancialRecord.index') }}" class="submenu-link">Catatan Keuangan</a>

@@ -6,18 +6,18 @@
             </a>
         </header>
         <div class="page-heading">
-            <h3>Product Master</h3>
+            <h3>Master Obat</h3>
         </div>
         <div class="page-content">
             <div class="card">
                 <div class="card-header">
                     <button class="btn btn-outline-primary btn-sm rounded" type="button" data-bs-toggle="modal"
                         data-bs-target="#modalProduct">
-                        Add Product
+                        Obat Single
                     </button>
                     <button class="btn btn-outline-success btn-sm rounded"
                         onclick="window.open('{{ route('ProductBundle.create') }}')">
-                        Add Bundle
+                        Obat Bundle
                     </button>
                 </div>
                 <div class="card-body">

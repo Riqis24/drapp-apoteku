@@ -25,9 +25,18 @@ class SaMstrController extends Controller
      * INDEX
      * =====================================================
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = SaMstr::with(['location', 'createdby'])->orderByDesc('sa_mstr_id')->get();
+        $query = SaMstr::with(['location', 'createdby']);
+        $query->when($request->start_date, function ($q) use ($request) {
+            return $q->whereDate('created_at', '>=', $request->start_date);
+        });
+
+        $query->when($request->end_date, function ($q) use ($request) {
+            return $q->whereDate('created_at', '<=', $request->end_date);
+        });
+
+        $data = $query->orderByDesc('sa_mstr_id')->get();
         return view('adjustment.SaMstrList', compact('data'));
     }
 

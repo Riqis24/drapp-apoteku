@@ -11,6 +11,30 @@
         <div class="page-content">
             <div class="card">
                 <div class="card-header">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <form action="{{ route('PrMstr.index') }}" method="GET" class="row g-3 align-items-end">
+                                <div class="col-md-3">
+                                    <label class="form-label">Dari Tanggal</label>
+                                    <input type="date" name="start_date" class="form-control form-control-sm"
+                                        value="{{ request('start_date') }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Sampai Tanggal</label>
+                                    <input type="date" name="end_date" class="form-control form-control-sm"
+                                        value="{{ request('end_date') }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-filter"></i> Filter
+                                    </button>
+                                    <a href="{{ route('PrMstr.index') }}" class="btn btn-sm btn-secondary">
+                                        <i class="bi bi-arrow-clockwise"></i> Reset
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <table id="PrTable" class="table table-striped dt-responsive table-bordered table-sm nowrap">

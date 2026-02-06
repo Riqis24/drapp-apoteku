@@ -332,7 +332,6 @@ class SalesMstrController extends Controller
      */
     public function index(Request $request)
     {
-        $transactions = SalesMstr::with('loc')->orderBy('sales_mstr_id', 'desc')->get(); // Inisialisasi query
         $query = SalesMstr::with('loc'); // Sesuaikan dengan nama model Anda
 
         // Filter berdasarkan tanggal jika ada input

@@ -10,13 +10,44 @@
         </div>
         <div class="page-content">
             <div class="card">
-                <div class="card-header">
-                    <button class="btn btn-outline-primary btn-sm rounded" type="button"
-                        onclick="window.open('{{ route('ArpayMstr.create') }}', '_blank')">
-                        <i class="bi bi-cash me-2"></i>Pay
-                    </button>
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div>
+                            <button class="btn btn-outline-primary btn-sm rounded shadow-sm" type="button"
+                                onclick="window.open('{{ route('ArpayMstr.create') }}', '_blank')">
+                                <i class="bi bi-cash me-2"></i>Pay
+                            </button>
+                        </div>
+
+                        <div class="flex-grow-1">
+                            <form action="{{ route('ArMstr.index') }}" method="GET"
+                                class="row g-2 justify-content-md-end align-items-end">
+                                <div class="col-6 col-md-3 col-lg-2">
+                                    <label class="form-label small mb-1 fw-bold">Dari Tanggal</label>
+                                    <input type="date" name="start_date" class="form-control form-control-sm"
+                                        value="{{ request('start_date') }}">
+                                </div>
+                                <div class="col-6 col-md-3 col-lg-2">
+                                    <label class="form-label small mb-1 fw-bold">Sampai Tanggal</label>
+                                    <input type="date" name="end_date" class="form-control form-control-sm"
+                                        value="{{ request('end_date') }}">
+                                </div>
+                                <div class="col-12 col-md-auto">
+                                    <div class="btn-group w-100">
+                                        <button type="submit" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-filter"></i> Filter
+                                        </button>
+                                        <a href="{{ route('ArMstr.index') }}" class="btn btn-sm btn-secondary">
+                                            <i class="bi bi-arrow-clockwise"></i> Reset
+                                        </a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
+
                     <div class="table-responsive">
                         <table id="ExpenseTable" class="table table-striped table-bordered table-sm nowrap"
                             style="width:100%">
@@ -67,12 +98,6 @@
                         </table>
                     </div>
                 </div>
-
-
-
-
-                </form>
-
             </div>
         </div>
     </div>

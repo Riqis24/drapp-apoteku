@@ -6,14 +6,14 @@
             </a>
         </header>
         <div class="page-heading">
-            <h3>Location Master</h3>
+            <h3>Master Gudang</h3>
         </div>
         <div class="page-content">
             <div class="card">
                 <div class="card-header">
                     <button class="btn btn-outline-primary btn-sm rounded" type="button" data-bs-toggle="modal"
                         data-bs-target="#addLocModal">
-                        Add Location
+                        Tambah Gudang
                     </button>
                 </div>
                 <div class="card-body">

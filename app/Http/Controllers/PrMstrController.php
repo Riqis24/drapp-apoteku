@@ -27,10 +27,19 @@ class PrMstrController extends Controller
     /* ===============================
      * LIST RETURN
      * =============================== */
-    public function index()
+    public function index(Request $request)
     {
-        $returns = PrMstr::with(['bpb', 'po'])
-            ->orderBy('pr_mstr_date', 'desc')
+        $query = PrMstr::with(['bpb', 'po']);
+
+        $query->when($request->start_date, function ($q) use ($request) {
+            return $q->whereDate('created_at', '>=', $request->start_date);
+        });
+
+        $query->when($request->end_date, function ($q) use ($request) {
+            return $q->whereDate('created_at', '<=', $request->end_date);
+        });
+
+        $returns = $query->orderBy('pr_mstr_date', 'desc')
             ->get();
 
         return view('purchase.PurchaseReturnList', compact('returns'));

@@ -19,13 +19,18 @@ class TsMstrController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data = TsMstr::with(['fromLocation', 'toLocation'])
-            ->latest()
-            ->get();
+        $query = TsMstr::with(['fromLocation', 'toLocation']);
+        $query->when($request->start_date, function ($q) use ($request) {
+            return $q->whereDate('created_at', '>=', $request->start_date);
+        });
 
+        $query->when($request->end_date, function ($q) use ($request) {
+            return $q->whereDate('created_at', '<=', $request->end_date);
+        });
 
+        $data = $query->latest()->get();
 
         return view('transfer.TsMstrList', compact('data'));
     }

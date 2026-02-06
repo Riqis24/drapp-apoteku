@@ -5,15 +5,26 @@ namespace App\Http\Controllers;
 use App\Models\ArMstr;
 use App\Http\Requests\StoreArMstrRequest;
 use App\Http\Requests\UpdateArMstrRequest;
+use Illuminate\Http\Request;
 
 class ArMstrController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $ars = ArMstr::with('customer')->get();
+        $query = ArMstr::with('customer');
+        $query->when($request->start_date, function ($q) use ($request) {
+            return $q->whereDate('created_at', '>=', $request->start_date);
+        });
+
+        $query->when($request->end_date, function ($q) use ($request) {
+            return $q->whereDate('created_at', '<=', $request->end_date);
+        });
+
+        $ars = $query->get();
+
         return view('ar.ArMstrList', compact('ars'));
     }
 

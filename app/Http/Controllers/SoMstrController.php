@@ -20,12 +20,18 @@ class SoMstrController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $opnames = SoMstr::with(['location', 'createdBy'])
-            ->latest('so_mstr_date')
-            ->get();
+        $query = SoMstr::with(['location', 'createdBy']);
+        $query->when($request->start_date, function ($q) use ($request) {
+            return $q->whereDate('created_at', '>=', $request->start_date);
+        });
 
+        $query->when($request->end_date, function ($q) use ($request) {
+            return $q->whereDate('created_at', '<=', $request->end_date);
+        });
+
+        $opnames = $query->orderBy('so_mstr_id', 'desc')->get();
         return view('so.SoMstrList', compact('opnames'));
     }
 

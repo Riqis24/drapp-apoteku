@@ -18,9 +18,18 @@ class ApMstrController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $aps = ApMstr::with('supplier')->get();
+        $query = ApMstr::with('supplier');
+        $query->when($request->start_date, function ($q) use ($request) {
+            return $q->whereDate('created_at', '>=', $request->start_date);
+        });
+
+        $query->when($request->end_date, function ($q) use ($request) {
+            return $q->whereDate('created_at', '<=', $request->end_date);
+        });
+
+        $aps = $query->get();
         return view('ap.ApMstrList', compact('aps'));
     }
 

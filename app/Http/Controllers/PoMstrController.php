@@ -19,9 +19,18 @@ class PoMstrController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $orders = PoMstr::with(['supplier', 'user'])->orderBy('po_mstr_id', 'desc')->get();
+        $query = PoMstr::with(['supplier', 'user']);
+        $query->when($request->start_date, function ($q) use ($request) {
+            return $q->whereDate('po_mstr_createdat', '>=', $request->start_date);
+        });
+
+        $query->when($request->end_date, function ($q) use ($request) {
+            return $q->whereDate('po_mstr_createdat', '<=', $request->end_date);
+        });
+
+        $orders = $query->get();
         return view('purchase.PurchaseOrderMstr', compact('orders'));
     }
 
