@@ -33,8 +33,8 @@ class ProductPlacementController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'code' => 'required|unique:product_placements',
-            'name' => 'required'
+            'code' => 'required',
+            'name' => 'required|unique:product_placements'
         ]);
 
         ProductPlacement::create($request->only('code', 'name', 'description'));

@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
         $this->call([
+            RoleSeeder::class,
             MeasurementSeeder::class,
             ProductSeeder::class,
             SuppMstrSeeder::class,
@@ -38,14 +39,14 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
             'user_mstr_password' => 'password',
             'remember_token' => Str::random(10),
-        ]);
+        ])->assignRole('Super Admin');
         User::create([
             'user_mstr_name' => 'Akhmad',
             'user_mstr_email' => 'akhmad@mail.com',
             'email_verified_at' => now(),
             'user_mstr_password' => 'password',
             'remember_token' => Str::random(10),
-        ]);
+        ])->assignRole('Super Admin');
 
         // \App\Models\Product::factory(100)->create()->each(function ($product) {
         //     // Assign 2 satuan random ke setiap produk

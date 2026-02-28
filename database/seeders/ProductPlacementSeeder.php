@@ -15,22 +15,22 @@ class ProductPlacementSeeder extends Seeder
     {
         ProductPlacement::create([
             'code' => 'PP-001',
-            'name' => 'RAK A',
+            'name' => 'RAK A BAWAH',
             'description' => 'RAK A BAWAH',
         ]);
         ProductPlacement::create([
             'code' => 'PP-002',
-            'name' => 'RAK A',
+            'name' => 'RAK A ATAS',
             'description' => 'RAK A ATAS',
         ]);
         ProductPlacement::create([
             'code' => 'PP-003',
-            'name' => 'RAK B',
+            'name' => 'RAK B ATAS',
             'description' => 'RAK B ATAS',
         ]);
         ProductPlacement::create([
             'code' => 'PP-004',
-            'name' => 'RAK B',
+            'name' => 'RAK B BAWAH',
             'description' => 'RAK B BAWAH',
         ]);
     }
