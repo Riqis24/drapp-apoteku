@@ -4,6 +4,7 @@ $(document).ready(function () {
         autoWidth: true,
         pageLength: 10,
         scrollY: "350px",
+        scrollX: true,
     });
 
     $(".select2").select2({

@@ -9,93 +9,122 @@
             <h3>Master Obat</h3>
         </div>
         <div class="page-content">
-            <div class="card">
-                <div class="card-header">
-                    <button class="btn btn-outline-primary btn-sm rounded" type="button" data-bs-toggle="modal"
-                        data-bs-target="#modalProduct">
-                        Obat Single
-                    </button>
-                    <button class="btn btn-outline-success btn-sm rounded"
-                        onclick="window.open('{{ route('ProductBundle.create') }}')">
-                        Obat Bundle
-                    </button>
+            <div class="card ux-card">
+                <div class="ux-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 text-primary fw-bold">
+                        <i class="bi bi-box-seam me-2"></i>Master Produk & Obat
+                    </h5>
+
+                    <div class="gap-2 d-flex">
+                        <button class="px-3 shadow-sm btn btn-primary fw-bold rounded-3" type="button"
+                            data-bs-toggle="modal" data-bs-target="#modalProduct">
+                            <i class="bi bi-plus-lg me-1"></i> Obat Single
+                        </button>
+                        <button class="px-3 shadow-sm btn btn-success fw-bold rounded-3"
+                            onclick="window.open('{{ route('ProductBundle.create') }}')">
+                            <i class="bi bi-boxes me-1"></i> Obat Bundle
+                        </button>
+                    </div>
                 </div>
+
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="productTable" class="table table-striped table-bordered table-sm nowrap"
-                            style="width:100%">
-                            <thead class="table-dark">
+                        <table id="productTable" class="table table-ux">
+                            <thead>
                                 <tr>
-                                    <th style="width:5%; text-align: center">No</th>
-                                    <th style="width:15%; text-align: center">Code</th>
-                                    <th style="width:20%; text-align: center">Name</th>
-                                    <th style="text-align: center">Description</th>
-                                    <th style="width:10%; text-align: center">Measurement</th>
-                                    <th style="width:10%; text-align: center">Category</th>
-                                    <th style="width:10%; text-align: center">Margin</th>
-                                    <th style="width:10%; text-align: center">Type</th>
-                                    <th style="width:5%; text-align: center">Action</th>
-                                    {{-- <th>Product</th> --}}
-                                    {{-- <th>Status</th> --}}
-                                    {{-- <th>Aksi</th> --}}
+                                    <th class="text-center" style="width:5%">No</th>
+                                    <th>Kode</th>
+                                    <th>Nama Produk</th>
+                                    <th>Satuan</th>
+                                    <th>Kategori</th>
+                                    <th class="text-end">Margin</th>
+                                    <th class="text-center">Tipe</th>
+                                    <th class="text-center" style="width:15%">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($products as $product)
                                     <tr>
-                                        <td style="text-align: right">{{ $loop->iteration }}</td>
-                                        <td>{{ $product->code }}</td>
-                                        <td>{{ $product->name }}</td>
-                                        <td>{{ $product->description }}</td>
-                                        <td>{{ $product->measurement->name }}</td>
-                                        <td>{{ $product->cat->product_cat_name ?? '-' }}</td>
-                                        <td style="text-align: right">
-                                            {{ $product->margin ? numfmt($product->margin) . '%' : '-' }}</td>
-                                        <td>{{ $product->type }}</td>
-                                        <td style="text-align: center">
-                                            <button type="button" class="btn btn-sm btn-info rounded"
-                                                data-bs-toggle="tooltip" data-bs-placement="top"
-                                                title="Kelola Satuan & Konversi"
-                                                onclick="window.location.href='{{ route('EditPrdMeasurement', $product->id) }}'">
-                                                <i class="bi bi-folder"></i>
-                                            </button>
-
+                                        <td class="text-center">
+                                            <span class="ux-sub-text fw-bold">{{ $loop->iteration }}</span>
+                                        </td>
+                                        <td>
+                                            <code class="text-primary fw-bold">{{ $product->code }}</code>
+                                        </td>
+                                        <td>
+                                            <div class="ux-main-text fw-bold">{{ $product->name }}</div>
+                                            <div class="ux-sub-text small text-truncate" style="max-width: 200px;">
+                                                {{ $product->description }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="border badge bg-light text-dark fw-normal">
+                                                {{ $product->measurement->name }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="ux-main-text">{{ $product->cat->product_cat_name ?? '-' }}</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="fw-bold text-success">
+                                                {{ $product->margin ? numfmt($product->margin) . '%' : '-' }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
                                             @if ($product->type == 'single')
-                                                <button class="btn btn-warning btn-sm" data-bs-toggle="tooltip"
-                                                    data-bs-placement="top" title="Edit Cepat"
-                                                    onclick="editProduct({
-                id: {{ $product->id }},
-                code: '{{ $product->code }}',
-                name: '{{ $product->name }}',
-                description: '{{ $product->description }}',
-                satuan: '{{ $product->measurement_id }}',
-                cat: '{{ $product->category }}',
-                margin: {{ $product->margin }},
-                type: '{{ $product->type }}',
-                is_stockable: {{ $product->is_stockable }},
-                is_visible: {{ $product->is_visible }}
-            })">
-                                                    <i class="bi bi-pencil"></i>
+                                                <span
+                                                    class="px-3 badge rounded-pill bg-info-light text-info border-info">SINGLE</span>
+                                            @else
+                                                <span
+                                                    class="px-3 badge rounded-pill bg-purple-light text-purple border-purple">BUNDLE</span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="gap-1 d-flex justify-content-center">
+                                                <button class="btn-ux-action btn-view"
+                                                    onclick="window.location.href='{{ route('EditPrdMeasurement', $product->id) }}'"
+                                                    data-bs-toggle="tooltip" title="Kelola Satuan & Konversi">
+                                                    <i class="bi bi-arrow-left-right"></i>
                                                 </button>
 
-                                                <a href="{{ route('ProductMstr.edit', $product->id) }}"
-                                                    class="btn btn-secondary btn-sm" data-bs-toggle="tooltip"
-                                                    data-bs-placement="top" title="Lihat Detail Lengkap">
-                                                    <i class="bi bi-info-circle"></i>
-                                                </a>
-                                            @else
-                                                <a href="{{ route('ProductBundle.edit', $product->id) }}"
-                                                    class="btn btn-warning btn-sm" data-bs-toggle="tooltip"
-                                                    data-bs-placement="top" title="Edit Bundle Produk">
-                                                    <i class="bi bi-pencil"></i>
-                                                </a>
-                                            @endif
+                                                @if ($product->type == 'single')
+                                                    <button class="btn-ux-action btn-edit"
+                                                        onclick="editProduct({
+                                                id: {{ $product->id }},
+                                                code: '{{ $product->code }}',
+                                                name: '{{ $product->name }}',
+                                                description: '{{ $product->description }}',
+                                                satuan: '{{ $product->measurement_id }}',
+                                                cat: '{{ $product->category }}',
+                                                margin: {{ $product->margin }},
+                                                type: '{{ $product->type }}',
+                                                is_stockable: {{ $product->is_stockable }},
+                                                is_visible: {{ $product->is_visible }}
+                                            })"
+                                                        data-bs-toggle="tooltip" title="Edit Cepat">
+                                                        <i class="bi bi-lightning-fill"></i>
+                                                    </button>
 
-                                            <button class="btn btn-danger btn-sm" data-bs-toggle="tooltip"
-                                                data-bs-placement="top" title="Hapus Produk"
-                                                onclick="deleteProduct({{ $product->id }}, '{{ $product->name }}')">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
+                                                    <button class="btn-ux-action btn-view"
+                                                        onclick="window.location.href='{{ route('ProductMstr.edit', $product->id) }}'"
+                                                        data-bs-toggle="tooltip" title="Detail Lengkap">
+                                                        <i class="bi bi-info-circle"></i>
+                                                    </button>
+                                                @else
+                                                    <button class="btn-ux-action btn-edit"
+                                                        onclick="window.location.href='{{ route('ProductBundle.edit', $product->id) }}'"
+                                                        data-bs-toggle="tooltip" title="Edit Bundle">
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </button>
+                                                @endif
+
+                                                <button class="btn-ux-action btn-delete"
+                                                    onclick="deleteProduct({{ $product->id }}, '{{ $product->name }}')"
+                                                    data-bs-toggle="tooltip" title="Hapus">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -121,22 +150,22 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-md-2 mb-3">
+                            <div class="mb-3 col-md-2">
                                 <label class="form-label">Kode</label>
                                 <input type="text" class="form-control form-control-sm" name="code" id="edit_code"
                                     required>
                             </div>
-                            <div class="col-md-5 mb-3">
+                            <div class="mb-3 col-md-5">
                                 <label class="form-label">Nama</label>
-                                <input type="text" class="form-control form-control-sm" name="name" id="edit_name"
-                                    required>
+                                <input type="text" class="form-control form-control-sm" name="name"
+                                    id="edit_name" required>
                             </div>
-                            <div class="col-md-5 mb-3">
+                            <div class="mb-3 col-md-5">
                                 <label class="form-label">Deskripsi</label>
                                 <input type="text" class="form-control form-control-sm" name="description"
                                     id="edit_description" required>
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="mb-3 col-md-3">
                                 <label class="form-label">Satuan</label>
                                 <select name="satuan" id="edit_satuan" class="form-control form-control-sm">
                                     @foreach ($satuans as $satuan)
@@ -144,7 +173,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="mb-3 col-md-3">
                                 <label class="form-label">Kategori</label>
                                 <select name="cat" id="edit_cat" class="form-control form-control-sm">
                                     @foreach ($cats as $cat)
@@ -153,12 +182,12 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="mb-3 col-md-3">
                                 <label class="form-label">Margin (%)</label>
                                 <input type="number" class="form-control form-control-sm" name="margin"
                                     id="edit_margin" required>
                             </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="mb-3 col-md-3">
                                 <label class="form-label">Type</label>
                                 <select name="type" id="edit_type" class="form-control form-control-sm">
                                     <option value="single">Single</option>

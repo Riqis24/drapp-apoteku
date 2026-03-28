@@ -3,6 +3,7 @@ $(document).ready(function () {
         responsive: true,
         autoWidth: true,
         pageLength: 10,
+        scrollX: true,
         scrollY: "350px",
     });
 

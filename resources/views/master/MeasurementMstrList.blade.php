@@ -9,48 +9,58 @@
             <h3>Master Satuan</h3>
         </div>
         <div class="page-content">
-            <div class="card">
-                <div class="card-header">
-                    <button class="btn btn-outline-primary btn-sm rounded" type="button" data-bs-toggle="modal"
-                        data-bs-target="#modalAddMeasurement">
-                        Tambah Satuan
+            <div class="card ux-card">
+                <div class="ux-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 text-primary fw-bold">
+                        <i class="bi bi-rulers me-2"></i>Master Satuan
+                    </h5>
+
+                    <button class="px-4 shadow-sm btn btn-primary fw-bold rounded-3" type="button"
+                        data-bs-toggle="modal" data-bs-target="#modalAddMeasurement">
+                        <i class="bi bi-plus-lg me-2"></i>Tambah Satuan
                     </button>
                 </div>
+
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="measurementTable" class="table table-striped table-bordered table-sm nowrap"
-                            style="width:100%">
-                            <thead class="table-dark">
+                        <table id="measurementTable" class="table table-ux">
+                            <thead>
                                 <tr>
-                                    <th style="width:5%; text-align: center">No</th>
-                                    <th style="text-align: center">Nama</th>
-                                    {{-- <th>Role</th> --}}
-                                    {{-- <th>Status</th> --}}
-                                    <th style="width:5%;">Aksi</th>
+                                    <th class="text-center" style="width:10%">No</th>
+                                    <th>Nama Satuan</th>
+                                    <th class="text-center" style="width:15%">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($measurements as $measurement)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $measurement->name }}</td>
+                                        <td class="text-center">
+                                            <span class="ux-sub-text fw-bold">{{ $loop->iteration }}</span>
+                                        </td>
                                         <td>
-                                            <button type="button" class="btn btn-sm btn-warning editBtn"
-                                                data-id="{{ $measurement->id }}" data-name="{{ $measurement->name }}"
-                                                data-bs-toggle="modal" data-bs-target="#modalEditMeasurement">
-                                                <i class="bi bi-pen" style="font-size: 12px"></i>
-                                            </button>
-
-                                            <form action="{{ route('MeasurementMstr.destroy', $measurement->id) }}"
-                                                method="POST" id="delete-form-{{ $measurement->id }}"
-                                                style="display: inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="button" class="btn btn-sm btn-danger deleteBtn"
-                                                    onclick="confirmDelete('{{ $measurement->id }}')">
-                                                    <i class="bi bi-trash" style="font-size: 12px"></i>
+                                            <span class="ux-main-text fw-bold">{{ $measurement->name }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="gap-2 d-flex justify-content-center">
+                                                <button type="button" class="btn-ux-action btn-edit editBtn"
+                                                    data-id="{{ $measurement->id }}"
+                                                    data-name="{{ $measurement->name }}" data-bs-toggle="modal"
+                                                    data-bs-target="#modalEditMeasurement" title="Edit Satuan">
+                                                    <i class="bi bi-pencil-fill"></i>
                                                 </button>
-                                            </form>
+
+                                                <form action="{{ route('MeasurementMstr.destroy', $measurement->id) }}"
+                                                    method="POST" id="delete-form-{{ $measurement->id }}"
+                                                    class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="button" class="btn-ux-action btn-delete"
+                                                        onclick="confirmDelete('{{ $measurement->id }}')"
+                                                        title="Hapus Satuan">
+                                                        <i class="bi bi-trash3-fill"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -58,8 +68,7 @@
                         </table>
                     </div>
                 </div>
-                <div class="card-footer">
-
+                <div class="py-3 bg-white border-0 card-footer">
                 </div>
             </div>
         </div>
@@ -86,7 +95,7 @@
                                     </div>
                                     <div class="col-md-3">
                                         <button type="button"
-                                            class="btn btn-danger btn-sm rounded removeRow">❌</button>
+                                            class="rounded btn btn-danger btn-sm removeRow">❌</button>
                                     </div>
                                 </div>
                             </div>

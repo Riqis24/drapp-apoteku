@@ -27,6 +27,196 @@
     <link rel="stylesheet" href="{{ url('assets/compiled/css/app.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/compiled/css/app-dark.css') }}" />
     <link rel="stylesheet" href="{{ url('assets/compiled/css/iconly.css') }}" />
+    <style>
+        /* Dasar Card Utama */
+        .ux-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.05);
+            background: #fff;
+        }
+
+        .ux-header {
+            background: transparent;
+            padding: 1.5rem;
+            border-bottom: 1px solid #f8f9fa;
+        }
+
+        /* Section Filter yang Reusable */
+        .ux-filter-area {
+            background: #f8f9fc;
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid #edf0f7;
+            margin-bottom: 2rem;
+        }
+
+        /* Tabel Modern: Floating Style */
+        .table-ux {
+            width: 100%;
+            border-collapse: collapse !important;
+            /* Kembalikan ke collapse untuk hilangkan gap */
+            margin-top: 0 !important;
+        }
+
+        /* Header tetap bersih */
+        .table-ux thead th {
+            color: #94a3b8;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            /* padding: 12px 15px !important; */
+            border-bottom: 1px solid #f1f3f9 !important;
+            /* Garis tipis bawah header */
+            background: #ffffff;
+        }
+
+        /* Memastikan kontainer tabel bisa di-scroll secara horizontal di mobile */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            /* Smooth scroll untuk iOS */
+            display: block;
+            width: 100%;
+        }
+
+        /* Memastikan thead tidak memiliki gaya yang memutus alur scroll */
+        .table-ux thead {
+            position: relative;
+            /* Hindari position: sticky jika scroll bermasalah di mobile tertentu */
+            z-index: 1;
+        }
+
+        /* Tambahan agar header tidak terpotong saat di-scroll */
+        .table-ux {
+            margin-bottom: 0;
+            border-collapse: collapse !important;
+        }
+
+        /* Baris Body */
+        .table-ux tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        .table-ux tbody tr:hover {
+            background-color: #f8f9fc !important;
+            /* Efek highlight saat hover */
+        }
+
+        .table-ux tbody td {
+            padding: 1rem 15px !important;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f3f9 !important;
+            /* Garis pemisah antar baris */
+            background: transparent;
+        }
+
+        /* Hilangkan border terakhir agar tidak ada garis di bawah tabel paling bawah */
+        .table-ux tbody tr:last-child td {
+            border-bottom: none !important;
+        }
+
+        /* Tipografi & Tombol Aksi (Tetap sama) */
+        .ux-main-text {
+            font-weight: 600;
+            color: #334155;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .ux-sub-text {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            display: block;
+        }
+
+        .ux-amount {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        /* Tombol Aksi Custom */
+        .btn-ux-action {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            /* Wajib untuk centering */
+            align-items: center;
+            /* Center Vertikal */
+            justify-content: center;
+            /* Center Horizontal */
+            border-radius: 10px;
+            /* Sudut melengkung halus */
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+            padding: 0;
+            /* Hapus padding bawaan bootstrap */
+            text-decoration: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        /* Ukuran Ikon agar konsisten */
+        .btn-ux-action i {
+            font-size: 1.1rem;
+            line-height: 1;
+            /* Mencegah spasi ekstra di bawah ikon */
+            display: block;
+        }
+
+        /* Efek Hover & Warna Ikon (Sesuai gambar referensi) */
+        .btn-view {
+            color: #00aeef;
+        }
+
+        /* Biru */
+        .btn-view:hover {
+            background: #f0faff;
+            border-color: #00aeef;
+            transform: translateY(-2px);
+        }
+
+        .btn-return {
+            color: #f9a825;
+        }
+
+        /* Kuning/Oranye */
+        .btn-return:hover {
+            background: #fffcf0;
+            border-color: #f9a825;
+            transform: translateY(-2px);
+        }
+
+        .btn-delete {
+            color: #ef5350;
+        }
+
+        /* Merah */
+        .btn-delete:hover {
+            background: #fff5f5;
+            border-color: #ef5350;
+            transform: translateY(-2px);
+        }
+
+        .btn-edit {
+            background-color: #fff5f5;
+            color: #f57c00;
+        }
+
+        .btn-edit:hover {
+            background-color: #f57c00;
+            color: #fff;
+        }
+
+        /* Grouping container agar rapi */
+        .action-container {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+    </style>
 </head>
 
 <body>
@@ -38,7 +228,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <img src="{{ url('assets/images/logo-cashier.png') }}" alt="logo"
                             style="width: 100%; max-width: 150px; height: auto; object-fit: contain;">
-                        <div class="theme-toggle d-flex gap-2 align-items-center mt-2">
+                        <div class="gap-2 mt-2 theme-toggle d-flex align-items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                                 aria-hidden="true" role="img" class="iconify iconify--system-uicons" width="20"
                                 height="20" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21">

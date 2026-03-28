@@ -9,34 +9,63 @@
             <h3>Stock Card</h3>
         </div>
         <div class="page-content">
-            <div class="card">
+            <div class="border-0 shadow-sm card ux-card">
+                <div class="ux-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 text-primary fw-bold">
+                        <i class="bi bi-grid-3x3-gap me-2"></i>Kartu Stok (Stock Card)
+                    </h5>
+                    <div class="ux-action-gap">
+                        {{-- Slot untuk filter jika diperlukan --}}
+                    </div>
+                </div>
+
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table id="productTable" class="table table-striped table-bordered table-sm nowrap">
-                            <thead class="table-dark">
+                    <div class="border-0 table-responsive">
+                        <table id="productTable" class="table mb-0 align-middle table-ux table-hover">
+                            <thead class="text-center table-dark">
                                 <tr>
-                                    <th style="width:5%; text-align: center">No</th>
-                                    <th style="width:15%; text-align: center">Code</th>
-                                    <th style="width:20%; text-align: center">Name</th>
-                                    <th style="text-align: center">Description</th>
-                                    <th style="width:10%; text-align: center">Measurement</th>
-                                    <th style="width:10%; text-align: center">Category</th>
-                                    <th style="width:5%; text-align: center">Action</th>
+                                    <th style="width:5%">No</th>
+                                    <th style="width:15%">Code</th>
+                                    <th style="width:20%">Name</th>
+                                    <th>Description</th>
+                                    <th style="width:12%">Measurement</th>
+                                    <th style="width:12%">Category</th>
+                                    <th style="width:5%">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($products as $product)
                                     <tr>
-                                        <td style="text-align: right">{{ $loop->iteration }}</td>
-                                        <td>{{ $product->code }}</td>
-                                        <td>{{ $product->name }}</td>
-                                        <td>{{ $product->description }}</td>
-                                        <td>{{ $product->measurement->name }}</td>
-                                        <td>{{ $product->cat->product_cat_name ?? '-' }}</td>
-                                        <td style="text-align: center">
-                                            <button type="button" class="btn btn-sm btn-info rounded"
-                                                onclick="window.location.href='{{ route('StockTransaction.DetStockCard', $product->id) }}'">
-                                                <i class="bi bi-folder"></i>
+                                        <td class="text-center">
+                                            <span class="ux-sub-text fw-bold">{{ $loop->iteration }}</span>
+                                        </td>
+                                        <td class="px-3">
+                                            <span class="fw-bold text-primary">{{ $product->code }}</span>
+                                        </td>
+                                        <td class="px-3">
+                                            <span class="ux-main-text fw-bold">{{ $product->name }}</span>
+                                        </td>
+                                        <td class="px-3">
+                                            <span class="ux-sub-text d-inline-block text-truncate"
+                                                style="max-width: 250px;">
+                                                {{ $product->description ?? '-' }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="px-3 border badge bg-light text-dark">
+                                                {{ $product->measurement->name }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="ux-sub-text">
+                                                {{ $product->cat->product_cat_name ?? '-' }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" class="shadow-sm btn btn-view"
+                                                onclick="window.location.href='{{ route('StockTransaction.DetStockCard', $product->id) }}'"
+                                                title="Buka Kartu Stok">
+                                                <i class="bi bi-folder2-open"></i>
                                             </button>
                                         </td>
                                     </tr>

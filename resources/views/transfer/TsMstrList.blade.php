@@ -9,80 +9,112 @@
             <h3>Pemindahan Barang</h3>
         </div>
         <div class="page-content">
-            <div class="card">
-                <div class="card-header bg-white py-3">
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                        <div>
-                            <button class="btn btn-outline-primary btn-sm rounded" type="button"
-                                onclick="window.location.href='{{ route('TsMstr.create') }}'">
-                                Tambah Pemindahan Barang
-                            </button>
-                        </div>
+            <div class="card ux-card">
+                <div class="ux-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 text-primary fw-bold">
+                        <i class="bi bi-arrow-left-right me-2"></i>Transfer Stock
+                    </h5>
 
-                        <div class="flex-grow-1">
-                            <form action="{{ route('TsMstr.index') }}" method="GET"
-                                class="row g-2 justify-content-md-end align-items-end">
-                                <div class="col-6 col-md-3 col-lg-2">
-                                    <label class="form-label small mb-1 fw-bold">Dari Tanggal</label>
-                                    <input type="date" name="start_date" class="form-control form-control-sm"
-                                        value="{{ request('start_date') }}">
-                                </div>
-                                <div class="col-6 col-md-3 col-lg-2">
-                                    <label class="form-label small mb-1 fw-bold">Sampai Tanggal</label>
-                                    <input type="date" name="end_date" class="form-control form-control-sm"
-                                        value="{{ request('end_date') }}">
-                                </div>
-                                <div class="col-12 col-md-auto">
-                                    <div class="btn-group w-100">
-                                        <button type="submit" class="btn btn-sm btn-primary">
-                                            <i class="bi bi-filter"></i> Filter
-                                        </button>
-                                        <a href="{{ route('TsMstr.index') }}" class="btn btn-sm btn-secondary">
-                                            <i class="bi bi-arrow-clockwise"></i> Reset
-                                        </a>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                    <button class="px-4 shadow-sm btn btn-primary fw-bold rounded-3" type="button"
+                        onclick="window.location.href='{{ route('TsMstr.create') }}'">
+                        <i class="bi bi-plus-lg me-2"></i>Tambah Pemindahan
+                    </button>
                 </div>
+
                 <div class="card-body">
+                    <div class="mb-4 ux-filter-area">
+                        <form action="{{ route('TsMstr.index') }}" method="GET" class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label ux-sub-text fw-bold">DARI TANGGAL</label>
+                                <input type="date" name="start_date" class="border-0 shadow-sm form-control"
+                                    value="{{ request('start_date') }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label ux-sub-text fw-bold">SAMPAI TANGGAL</label>
+                                <input type="date" name="end_date" class="border-0 shadow-sm form-control"
+                                    value="{{ request('end_date') }}">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="px-4 shadow-sm btn btn-primary fw-bold rounded-3">
+                                    <i class="bi bi-filter"></i> Apply
+                                </button>
+                                <a href="{{ route('TsMstr.index') }}"
+                                    class="px-4 btn btn-light ms-2 rounded-3 text-muted">
+                                    Reset
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+
                     <div class="table-responsive">
-                        <table id="TsTable" class="table table-striped table-bordered table-sm nowrap">
-                            <thead class="table-dark">
+                        <table id="TsTable" class="table table-ux">
+                            <thead>
                                 <tr>
-                                    <th>No</th>
-                                    <th>TS#</th>
+                                    <th class="text-center" style="width:5%">No</th>
+                                    <th>No. Transfer (TS#)</th>
                                     <th>Tanggal</th>
-                                    <th>Dari</th>
-                                    <th>Ke</th>
-                                    <th>Status</th>
-                                    <th>Aksi</th>
+                                    <th>Alur Lokasi (Dari <i class="bi bi-arrow-right"></i> Ke)</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($data as $ts)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $ts->ts_mstr_nbr }}</td>
-                                        <td>{{ $ts->ts_mstr_date }}</td>
-                                        <td>{{ $ts->fromLocation->loc_mstr_name }}</td>
-                                        <td>{{ $ts->toLocation->loc_mstr_name }}</td>
-                                        <td>{{ strtoupper($ts->ts_mstr_status) }}</td>
+                                        <td class="text-center">
+                                            <span class="ux-sub-text fw-bold">{{ $loop->iteration }}</span>
+                                        </td>
                                         <td>
-                                            <a href="{{ route('TsMstr.show', $ts->ts_mstr_id) }}"
-                                                class="btn btn-sm btn-info">
-                                                <i class="bi bi-folder"></i>
-                                            </a>
-                                            <form action="{{ route('TsMstrList.destroy', $ts->ts_mstr_id) }}"
-                                                method="POST" class="d-inline" id="delete-form-{{ $ts->ts_mstr_id }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="button" class="btn btn-sm btn-danger"
-                                                    onclick="handleDelete('{{ $ts->ts_mstr_id }}')">
-                                                    <i class="bi bi-trash"></i>
+                                            <span class="ux-main-text text-primary">{{ $ts->ts_mstr_nbr }}</span>
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="ux-main-text">{{ \Carbon\Carbon::parse($ts->ts_mstr_date)->format('d/m/Y') }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="gap-2 d-flex align-items-center">
+                                                <span class="border badge bg-light text-dark fw-normal">
+                                                    {{ $ts->fromLocation->loc_mstr_name }}
+                                                </span>
+                                                <i class="bi bi-arrow-right text-muted"></i>
+                                                <span
+                                                    class="border badge bg-primary-subtle text-primary border-primary-subtle fw-normal">
+                                                    {{ $ts->toLocation->loc_mstr_name }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            @php
+                                                $status = strtolower($ts->ts_mstr_status);
+                                                $statusClass = match ($status) {
+                                                    'completed', 'done' => 'bg-success',
+                                                    'in transit', 'process' => 'bg-info text-white',
+                                                    'pending' => 'bg-warning text-dark',
+                                                    default => 'bg-secondary',
+                                                };
+                                            @endphp
+                                            <span class="badge {{ $statusClass }} rounded-pill px-3">
+                                                {{ strtoupper($status) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="gap-2 d-flex justify-content-center">
+                                                <button class="btn-ux-action btn-view"
+                                                    onclick="window.location.href='{{ route('TsMstr.show', $ts->ts_mstr_id) }}'"
+                                                    title="Detail">
+                                                    <i class="bi bi-eye"></i>
                                                 </button>
-                                            </form>
+
+                                                <form action="{{ route('TsMstrList.destroy', $ts->ts_mstr_id) }}"
+                                                    method="POST" class="d-inline"
+                                                    id="delete-form-{{ $ts->ts_mstr_id }}">
+                                                    @csrf @method('DELETE')
+                                                    <button type="button" class="btn-ux-action btn-delete"
+                                                        onclick="handleDelete('{{ $ts->ts_mstr_id }}')" title="Hapus">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -90,7 +122,6 @@
                         </table>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>

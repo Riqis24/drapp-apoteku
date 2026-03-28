@@ -3,6 +3,7 @@ $(document).ready(function () {
         responsive: true,
         autoWidth: true,
         pageLength: 10,
+        scrollX: true,
         scrollY: "350px",
     });
 });
@@ -11,10 +12,10 @@ $(document).ready(function () {
     $(".edit-btn").on("click", function () {
         const row = $(this).closest("tr");
         row.find(
-            ".name-display, .email-display, .role-display, .password-display"
+            ".name-display, .email-display, .role-display, .password-display",
         ).addClass("d-none");
         row.find(
-            ".name-input, .email-input, .role-input, .password-input"
+            ".name-input, .email-input, .role-input, .password-input",
         ).removeClass("d-none");
         row.find(".edit-btn").addClass("d-none");
         row.find(".update-btn").removeClass("d-none");
@@ -29,10 +30,10 @@ $(document).ready(function () {
         row.find(".role-display").text(row.find(".role-input").val());
 
         row.find(
-            ".name-input, .email-input, .password-input, .role-input"
+            ".name-input, .email-input, .password-input, .role-input",
         ).addClass("d-none");
         row.find(
-            ".name-display, .email-display, .password-display, .role-display"
+            ".name-display, .email-display, .password-display, .role-display",
         ).removeClass("d-none");
         row.find(".update-btn").addClass("d-none");
         row.find(".edit-btn").removeClass("d-none");
@@ -67,10 +68,10 @@ $(document).ready(function () {
                 row.find(".password-display").text(password);
 
                 row.find(
-                    ".name-input, .email-input, .role-input, .password-input"
+                    ".name-input, .email-input, .role-input, .password-input",
                 ).addClass("d-none");
                 row.find(
-                    ".name-display, .email-display, .role-display, .password-display"
+                    ".name-display, .email-display, .role-display, .password-display",
                 ).removeClass("d-none");
                 row.find(".update-btn").addClass("d-none");
                 row.find(".edit-btn").removeClass("d-none");

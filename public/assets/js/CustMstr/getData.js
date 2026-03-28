@@ -1,6 +1,7 @@
 $(document).ready(function () {
     $("#custTable").DataTable({
         responsive: true,
+        scrollX: true,
         autoWidth: true,
         pageLength: 10,
         scrollY: "350px",

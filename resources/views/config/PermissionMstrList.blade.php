@@ -9,42 +9,58 @@
             <h3>Permission Master</h3>
         </div>
         <div class="page-content">
-            <div class="card">
-                <div class="card-header">
-                    <button class="btn btn-outline-primary btn-sm rounded" type="button" data-bs-toggle="modal"
-                        data-bs-target="#modalAddRole">
-                        Add Permission
+            <div class="card ux-card">
+                <div class="ux-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 text-primary fw-bold">
+                        <i class="bi bi-key-fill me-2"></i>Master Permission
+                    </h5>
+
+                    <button class="px-4 shadow-sm btn btn-primary fw-bold rounded-3" type="button"
+                        data-bs-toggle="modal" data-bs-target="#modalAddRole">
+                        <i class="bi bi-plus-lg me-2"></i>Add Permission
                     </button>
                 </div>
+
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table id="myTable" class="table table-striped table-bordered table-sm nowrap"
-                            style="width:100%">
-                            <thead class="table-dark">
+                    <div class="border-0 table-responsive">
+                        <table id="myTable" class="table align-middle table-ux nowrap" style="width:100%">
+                            <thead>
                                 <tr>
-                                    <th style="width:5%; text-align: center">No</th>
-                                    <th style="width:75%;text-align: center">Name</th>
-                                    <th style="width:20%; text-align: center">Guard Name</th>
-                                    {{-- <th>Password</th> --}}
-                                    {{-- <th>Role</th> --}}
-                                    {{-- <th>Status</th> --}}
-                                    {{-- <th>Aksi</th> --}}
+                                    <th class="text-center" style="width:5%">No</th>
+                                    <th style="width:75%">Nama Permission / Kunci Akses</th>
+                                    <th class="text-center" style="width:20%">Guard Name</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($perms as $perm)
                                     <tr>
-                                        <td style="text-align: center">{{ $loop->iteration }}</td>
-                                        <td style="text-align: left">{{ $perm->name }}</td>
-                                        <td style="text-align: center">{{ $perm->guard_name }}</td>
+                                        <td class="text-center">
+                                            <span class="ux-sub-text fw-bold">{{ $loop->iteration }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-primary-light text-primary rounded-circle me-3 d-flex align-items-center justify-content-center"
+                                                    style="width: 32px; height: 32px;">
+                                                    <i class="bi bi-lock-fill" style="font-size: 14px;"></i>
+                                                </div>
+                                                <div>
+                                                    <span
+                                                        class="ux-main-text fw-bold text-dark">{{ $perm->name }}</span>
+                                                    <br>
+                                                    <small class="text-muted">Unique capability key</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="px-3 border badge rounded-pill bg-light text-secondary">
+                                                {{ $perm->guard_name }}
+                                            </span>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
-                </div>
-                <div class="card-footer">
-
                 </div>
             </div>
         </div>
@@ -70,7 +86,7 @@
                                     </div>
                                     <div class="col-md-3">
                                         <button type="button"
-                                            class="btn btn-danger btn-sm rounded removeRow">❌</button>
+                                            class="rounded btn btn-danger btn-sm removeRow">❌</button>
                                     </div>
                                 </div>
                             </div>

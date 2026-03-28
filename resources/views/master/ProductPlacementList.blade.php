@@ -9,52 +9,70 @@
             <h3>Master Lokasi</h3>
         </div>
         <div class="page-content">
-            <div class="card">
-                <div class="card-header">
-                    <button class="btn btn-outline-primary btn-sm rounded" type="button" data-bs-toggle="modal"
-                        data-bs-target="#modalAddPlacement">
-                        Tambah Lokasi
+            <div class="card ux-card">
+                <div class="ux-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 text-primary fw-bold">
+                        <i class="bi bi-box-seam me-2"></i>Penempatan Produk
+                    </h5>
+
+                    <button class="px-4 shadow-sm btn btn-primary fw-bold rounded-3" type="button"
+                        data-bs-toggle="modal" data-bs-target="#modalAddPlacement">
+                        <i class="bi bi-plus-lg me-2"></i>Tambah Lokasi
                     </button>
                 </div>
+
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table id="productTable" class="table table-striped table-bordered table-sm nowrap"
-                            style="width:100%">
-                            <thead class="table-dark">
+                    <div class="border-0 table-responsive">
+                        <table id="productTable" class="table align-middle table-ux nowrap" style="width:100%">
+                            <thead>
                                 <tr>
-                                    <th style="width:5%; text-align: center">No</th>
-                                    <th style="width:20%; text-align: center">Code</th>
-                                    <th style="width:20%; text-align: center">Name</th>
-                                    <th style="text-align: center">Description</th>
-                                    <th style="width:5%; text-align: center;">Aksi</th>
+                                    <th class="text-center" style="width:5%">No</th>
+                                    <th style="width:15%">Kode</th>
+                                    <th style="width:20%">Nama Lokasi</th>
+                                    <th>Deskripsi / Detail Rak</th>
+                                    <th class="text-center" style="width:10%">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($placements as $item)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $item->code }}</td>
-                                        <td>{{ $item->name }}</td>
-                                        <td>{{ $item->description }}</td>
-                                        <td style="text-align: center">
-                                            <button type="button" class="btn btn-sm btn-warning editBtnPlacement"
-                                                data-id="{{ $item->id }}" data-code="{{ $item->code }}"
-                                                data-name="{{ $item->name }}"
-                                                data-description="{{ $item->description }}" data-bs-toggle="modal"
-                                                data-bs-target="#modalEditPlacement">
-                                                <i class="bi bi-pen" style="font-size: 12px"></i>
-                                            </button>
-
-                                            <form action="{{ route('ProductPlacement.destroy', $item->id) }}"
-                                                method="POST" id="delete-form-{{ $item->id }}"
-                                                style="display: inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="button" class="btn btn-sm btn-danger"
-                                                    onclick="confirmDelete('{{ $item->id }}')">
-                                                    <i class="bi bi-trash" style="font-size: 12px"></i>
+                                        <td class="text-center">
+                                            <span class="ux-sub-text fw-bold">{{ $loop->iteration }}</span>
+                                        </td>
+                                        <td>
+                                            <code class="text-primary fw-bold">{{ $item->code }}</code>
+                                        </td>
+                                        <td>
+                                            <span class="ux-main-text fw-bold">{{ $item->name }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="ux-sub-text text-truncate d-inline-block"
+                                                style="max-width: 300px;" title="{{ $item->description }}">
+                                                {{ $item->description ?? '-' }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="gap-2 d-flex justify-content-center">
+                                                <button type="button" class="btn-ux-action btn-edit editBtnPlacement"
+                                                    data-id="{{ $item->id }}" data-code="{{ $item->code }}"
+                                                    data-name="{{ $item->name }}"
+                                                    data-description="{{ $item->description }}" data-bs-toggle="modal"
+                                                    data-bs-target="#modalEditPlacement" title="Edit Penempatan">
+                                                    <i class="bi bi-pencil-fill"></i>
                                                 </button>
-                                            </form>
+
+                                                <form action="{{ route('ProductPlacement.destroy', $item->id) }}"
+                                                    method="POST" id="delete-form-{{ $item->id }}"
+                                                    class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="button" class="btn-ux-action btn-delete"
+                                                        onclick="confirmDelete('{{ $item->id }}')"
+                                                        title="Hapus Penempatan">
+                                                        <i class="bi bi-trash3-fill"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -111,7 +129,8 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Edit Product Placement</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="row">

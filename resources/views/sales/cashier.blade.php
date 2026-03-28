@@ -196,70 +196,113 @@
     <style>
         .fab-wrapper {
             position: fixed;
-            bottom: 20px;
-            left: 20px;
+            bottom: 30px;
+            /* Sedikit lebih naik agar tidak terlalu mepet */
+            left: 30px;
             z-index: 9999;
         }
 
-        /* FIX ICON CENTER */
         .fab-main,
         .fab-item {
             width: 56px;
             height: 56px;
             border-radius: 50%;
+            /* Bulat sempurna */
             border: none;
             display: flex;
             align-items: center;
-            /* center vertical */
             justify-content: center;
-            /* center horizontal */
             color: #fff;
-            background: #0d6efd;
-            font-size: 22px;
             cursor: pointer;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, .25);
-            transition: all .3s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             text-decoration: none;
             padding: 0;
-            /* 🔥 penting */
             line-height: 1;
-            /* 🔥 penting */
         }
 
-        /* optional hover */
-        .fab-main:hover,
-        .fab-item:hover {
-            background: #0b5ed7;
-            transform: scale(1.08);
+        /* Warna Orange khas CIES */
+        .fab-main {
+            background: #fd7e14;
+            /* Orange Utama */
+            font-size: 24px;
+            position: relative;
+            z-index: 2;
         }
 
-        /* FAB ITEM POSITION */
+        .fab-main:hover {
+            background: #e96b02;
+            transform: scale(1.1) rotate(90deg);
+            /* Animasi rotasi saat hover */
+        }
+
+        /* State Aktif - Icon Utama Berubah */
+        .fab-wrapper.active .fab-main {
+            background: #343a40;
+            /* Berubah jadi gelap saat terbuka */
+            transform: scale(1) rotate(135deg);
+        }
+
         .fab-item {
             position: absolute;
             left: 0;
             bottom: 0;
             opacity: 0;
             pointer-events: none;
-            transform: translateY(0);
+            font-size: 20px;
+            z-index: 1;
         }
 
-        /* ACTIVE STATE */
+        /* Warna item bervariasi tapi tetap masuk tema */
+        .fab-item.btn-info {
+            background: #0dcafed9 !important;
+        }
+
+        .fab-item.btn-success {
+            background: #198754d9 !important;
+        }
+
+        .fab-item.btn-warning {
+            background: #ffc107d9 !important;
+        }
+
         .fab-wrapper.active .fab-item {
             opacity: 1;
             pointer-events: auto;
         }
 
-        /* 🔥 JARAK NAIK DIPERBESAR */
+        /* Jarak naik dengan efek pegas */
         .fab-wrapper.active .fab-item:nth-child(2) {
-            transform: translateY(-80px);
+            transform: translateY(-75px);
         }
 
         .fab-wrapper.active .fab-item:nth-child(3) {
-            transform: translateY(-160px);
+            transform: translateY(-140px);
         }
 
         .fab-wrapper.active .fab-item:nth-child(4) {
-            transform: translateY(-240px);
+            transform: translateY(-205px);
+        }
+
+        /* Tooltip Label (Optional) */
+        .fab-item::after {
+            content: attr(data-label);
+            position: absolute;
+            left: 70px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: 0.3s;
+            pointer-events: none;
+        }
+
+        .fab-wrapper.active .fab-item:hover::after {
+            opacity: 1;
+            left: 65px;
         }
     </style>
     <style>
@@ -282,12 +325,12 @@
     </style>
 
     {{-- <div id="main"> --}}
-    <div id="pos-wrapper" class="container-fluid p-0">
-        <div class="container-fluid px-3 mt-3">
-            <div class="pos-header mb-3">
+    <div id="pos-wrapper" class="p-0 container-fluid">
+        <div class="px-3 mt-3 container-fluid">
+            <div class="mb-3 pos-header">
                 <div class="row align-items-center g-3">
                     <div class="col-12 col-md-4">
-                        <div class="d-flex align-items-center justify-content-between justify-content-md-start gap-3">
+                        <div class="gap-3 d-flex align-items-center justify-content-between justify-content-md-start">
                             <h5 class="mb-0 text-truncate">{{ auth()->user()->user_mstr_name }}</h5>
                             <div class="summary-total d-md-none fw-bold text-primary">
                                 Rp <span id="grandTotal">0</span>
@@ -330,10 +373,10 @@
                     </div>
                 </div>
 
-                <hr class="d-md-none my-3">
+                <hr class="my-3 d-md-none">
 
-                <div class="d-flex justify-content-between align-items-center mt-2 mt-md-3">
-                    <div class="d-flex gap-2 w-100 w-md-auto justify-content-end">
+                <div class="mt-2 d-flex justify-content-between align-items-center mt-md-3">
+                    <div class="gap-2 d-flex w-100 w-md-auto justify-content-end">
                         <button class="btn btn-primary btn-sm flex-fill flex-md-grow-0" data-bs-toggle="modal"
                             data-bs-target="#openCashierModal">
                             <i class="bi bi-door-open me-1"></i> Buka
@@ -349,7 +392,7 @@
             <div class="card card-body">
                 <div class="row">
                     <div class="col-md-7">
-                        <div class="row mb-3 align-items-center">
+                        <div class="mb-3 row align-items-center">
                             <div class="col-md-9">
                                 <select id="itemInput" class="form-select">
                                     <option></option>
@@ -359,14 +402,14 @@
                                 <button type="button" class="btn btn-sm w-100" id="btn-buka-resep"
                                     style="background-color: #74bcff" data-bs-toggle="modal"
                                     data-bs-target="#modalRacik">
-                                    <i class="bi bi-capsule-pill me-2 text-white"></i> <span
+                                    <i class="text-white bi bi-capsule-pill me-2"></i> <span
                                         class="text-white fw-bold">Racik Obat (F3)</span>
                                 </button>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="row mb-2 align-items-center">
+                        <div class="mb-2 row align-items-center">
                             <div class="col-4">
                                 <span>Diskon Global</span>
                             </div>
@@ -386,7 +429,7 @@
 
                     </div>
                     <div class="col-md-2">
-                        <div class="d-flex justify-content-between mb-2">
+                        <div class="mb-2 d-flex justify-content-between">
                             <span class="me-2">PPN</span>
                             <select id="ppn_type" class="form-select form-select-sm w-100">
                                 <option value="none">Non PPN</option>
@@ -395,13 +438,13 @@
                         </div>
                     </div>
                 </div>
-                <div class="row mt-3">
+                <div class="mt-3 row">
                     {{-- CART --}}
                     <div class="col-md-9">
-                        <div class="card shadow-sm border-0">
-                            <div class="card-body p-0">
+                        <div class="border-0 shadow-sm card">
+                            <div class="p-0 card-body">
                                 <div class="table-responsive-sm">
-                                    <table class="table pos-table mb-0 responsive-cart-table">
+                                    <table class="table mb-0 pos-table responsive-cart-table">
                                         <thead>
                                             <tr>
                                                 <th>Produk</th>
@@ -423,19 +466,19 @@
 
                     {{-- SUMMARY --}}
                     <div class="col-md-3">
-                        <div class="summary-box shadow">
+                        <div class="shadow summary-box">
 
-                            <div class="d-flex justify-content-between mb-1">
+                            <div class="mb-1 d-flex justify-content-between">
                                 <span class="text-muted">Subtotal</span>
                                 <strong id="subtotal">Rp 0</strong>
                             </div>
 
-                            <div class="d-flex justify-content-between text-warning mb-1">
+                            <div class="mb-1 d-flex justify-content-between text-warning">
                                 <span>Diskon Global</span>
                                 <strong id="discGlobal">Rp 0</strong>
                             </div>
 
-                            <div class="d-flex justify-content-between mb-2">
+                            <div class="mb-2 d-flex justify-content-between">
                                 <span>PPN 11%</span>
                                 <strong id="ppnVal">Rp 0</strong>
                             </div>
@@ -443,7 +486,7 @@
                             <hr class="my-2">
 
                             <!-- TOTAL -->
-                            <div class="bg-primary text-white rounded p-3 mb-3">
+                            <div class="p-3 mb-3 text-white rounded bg-primary">
                                 <div class="d-flex justify-content-between align-items-center fs-4 fw-bold">
                                     <span>TOTAL</span>
                                     <span id="grandTotal2">Rp 0</span>
@@ -452,7 +495,7 @@
 
                             <!-- PAYMENT -->
                             <div class="mb-2">
-                                <label class="form-label fw-bold mb-1">
+                                <label class="mb-1 form-label fw-bold">
                                     PAYMENT
                                     <small class="text-muted">(F8)</small>
                                 </label>
@@ -464,7 +507,7 @@
 
                             <!-- CHANGE -->
                             <div class="mb-2">
-                                <label class="form-label fw-bold mb-1">
+                                <label class="mb-1 form-label fw-bold">
                                     CHANGE
                                 </label>
 
@@ -472,13 +515,13 @@
                                     class="form-control form-control-lg text-end text-success fw-bold" placeholder="0"
                                     min="0" inputmode="numeric" readonly>
                             </div>
-                            {{-- <div class="d-flex justify-content-between align-items-center fs-4 fw-bold mt-2">
+                            {{-- <div class="mt-2 d-flex justify-content-between align-items-center fs-4 fw-bold">
                                     <span>CHANGE</span>
                                     <span id="change" class="text-success">Rp 0</span>
                                 </div> --}}
 
                             <!-- ACTION -->
-                            <div class="d-grid gap-2 mt-4">
+                            <div class="gap-2 mt-4 d-grid">
                                 <button class="btn btn-success btn-lg fw-bold" id="button_pay">
                                     Pay <small class="fw-normal">(ALT + P)</small>
                                 </button>
@@ -507,7 +550,7 @@
             </td>
 
             <td data-label="Qty">
-                <input type="number" class="form-control form-control-sm qty text-center mx-md-auto" value="1"
+                <input type="number" class="text-center form-control form-control-sm qty mx-md-auto" value="1"
                     min="1" step="any" style="max-width: 80px;">
             </td>
 
@@ -536,7 +579,7 @@
             </td>
 
             <td class="text-center">
-                <button class="btn btn-sm btn-outline-danger removerow border-0">
+                <button class="border-0 btn btn-sm btn-outline-danger removerow">
                     <i class="bi bi-trash"></i> <span class="d-md-none">Hapus</span>
                 </button>
             </td>
@@ -546,29 +589,29 @@
 
     <div class="modal fade" id="holdListModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 1.25rem;">
-                <div class="modal-header border-0 pb-0"
+            <div class="border-0 shadow-lg modal-content" style="border-radius: 1.25rem;">
+                <div class="pb-0 border-0 modal-header"
                     style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 1.25rem 1.25rem 0 0;">
                     <div class="d-flex align-items-center">
-                        <div class="bg-warning bg-opacity-10 p-2 rounded-3 me-3">
+                        <div class="p-2 bg-warning bg-opacity-10 rounded-3 me-3">
                             <i class="bi bi-pause-btn-fill text-warning fs-4"></i>
                         </div>
                         <div>
-                            <h5 class="modal-title fw-bold mb-0">Transaksi Tertunda</h5>
+                            <h5 class="mb-0 modal-title fw-bold">Transaksi Tertunda</h5>
                             <small class="text-muted">Daftar transaksi yang sedang di-hold</small>
                         </div>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <div class="modal-body p-4">
+                <div class="p-4 modal-body">
                     <div class="table-responsive">
                         <table class="table align-middle custom-table">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="border-0 text-uppercase small fw-bold py-3 ps-4">No. Sales Order</th>
-                                    <th class="border-0 text-uppercase small fw-bold py-3 text-end">Total Nominal</th>
-                                    <th class="border-0 text-uppercase small fw-bold py-3 text-center">Aksi</th>
+                                    <th class="py-3 border-0 text-uppercase small fw-bold ps-4">No. Sales Order</th>
+                                    <th class="py-3 border-0 text-uppercase small fw-bold text-end">Total Nominal</th>
+                                    <th class="py-3 text-center border-0 text-uppercase small fw-bold">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="holdListBody">
@@ -585,7 +628,7 @@
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <div class="d-flex justify-content-center gap-2">
+                                            <div class="gap-2 d-flex justify-content-center">
                                                 <button class="btn btn-sm btn-action btn-primary"
                                                     onclick="resumeHold({{ $hold->sales_mstr_id }})"
                                                     title="Lanjutkan">
@@ -600,8 +643,8 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="text-center py-5">
-                                            <i class="bi bi-inbox text-muted fs-1 d-block mb-3"></i>
+                                        <td colspan="3" class="py-5 text-center">
+                                            <i class="mb-3 bi bi-inbox text-muted fs-1 d-block"></i>
                                             <span class="text-muted">Tidak ada transaksi yang tertunda.</span>
                                         </td>
                                     </tr>
@@ -619,7 +662,7 @@
         @csrf
         <div class="modal fade" id="openCashierModal" tabindex="-1">
             <div class="modal-dialog">
-                <div class="modal-content p-3">
+                <div class="p-3 modal-content">
                     <h5>Buka Kasir</h5>
                     <div class="mb-2">
                         <label>Lokasi</label>
@@ -648,7 +691,7 @@
             <div class="modal-content">
 
                 <!-- Header -->
-                <div class="modal-header text-white" style="background:#adc7fd">
+                <div class="text-white modal-header" style="background:#adc7fd">
                     <h5 class="modal-title">
                         <i class="bi bi-pill"></i> Buat Obat Racikan (Resep)
                     </h5>
@@ -659,16 +702,16 @@
                     <div class="p-3 mb-4 rounded-3" style="background: #f0f7ff; border: 1px dashed #adc7fd;">
                         <div class="row align-items-end g-2">
                             <div class="col-md-9">
-                                <label class="pos-label-mini mb-1 text-primary">
+                                <label class="mb-1 pos-label-mini text-primary">
                                     <i class="bi bi-clock-history"></i> Copy dari Racikan Sebelumnya (History)
                                 </label>
-                                <select id="copyHistoryRacik" class="form-select border-2 shadow-none"
+                                <select id="copyHistoryRacik" class="border-2 shadow-none form-select"
                                     style="border-radius: 10px;">
                                     <option value="">-- Cari Nama Racikan / Resep Lama --</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <button type="button" class="btn btn-primary w-100 fw-bold shadow-sm"
+                                <button type="button" class="shadow-sm btn btn-primary w-100 fw-bold"
                                     id="btnApplyCopy" style="height: 40px; border-radius: 10px;">
                                     <i class="bi bi-clipboard-check"></i> Gunakan
                                 </button>
@@ -681,19 +724,19 @@
                         </div>
                     </div>
 
-                    <div class="row mb-3">
+                    <div class="mb-3 row">
                         <div class="col-md-8">
-                            <label class="pos-label-mini mb-1">Nama Racikan Baru</label>
-                            <input type="text" id="namaRacikan" class="form-control border-2 fw-bold"
+                            <label class="mb-1 pos-label-mini">Nama Racikan Baru</label>
+                            <input type="text" id="namaRacikan" class="border-2 form-control fw-bold"
                                 placeholder="Cth: Puyer Batuk Anak..." style="border-radius: 10px; height: 45px;">
                         </div>
                         <div class="col-md-4">
-                            <label class="pos-label-mini mb-1">Jumlah Hasil (Bungkus/Kapsul)</label>
+                            <label class="mb-1 pos-label-mini">Jumlah Hasil (Bungkus/Kapsul)</label>
                             <div class="input-group">
                                 <input type="number" id="jumlahHasil"
-                                    class="form-control border-2 text-center fw-bold" value="10"
+                                    class="text-center border-2 form-control fw-bold" value="10"
                                     style="border-radius: 10px 0 0 10px; height: 45px;">
-                                <span class="input-group-text bg-light border-2 border-start-0"
+                                <span class="border-2 input-group-text bg-light border-start-0"
                                     style="border-radius: 0 10px 10px 0;">Unit</span>
                             </div>
                         </div>
@@ -707,7 +750,7 @@
 
                     <!-- Table -->
                     <div class="table-responsive">
-                        <table class="table table-bordered align-middle">
+                        <table class="table align-middle table-bordered">
                             <thead class="table-light">
                                 <tr>
                                     <th>Nama Bahan</th>
@@ -720,7 +763,7 @@
                             </thead>
                             <tbody id="racikTableBody">
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted py-4" id="racikEmpty">
+                                    <td colspan="6" class="py-4 text-center text-muted" id="racikEmpty">
                                         Belum ada bahan baku dipilih.<br>
                                         Gunakan pencarian di atas untuk menambahkan obat.
                                     </td>
@@ -730,7 +773,7 @@
                     </div>
 
                     <!-- Summary -->
-                    <div class="row mt-3">
+                    <div class="mt-3 row">
                         <div class="col-md-8">
                             <div class="p-3 rounded" style="background:#fffbe6">
                                 <div class="mb-2 d-flex justify-content-between align-items-center">
@@ -753,7 +796,7 @@
                         </div>
 
                         <div class="col-md-4 text-end">
-                            <div class="fw-bold mb-2">Harga Jual Total</div>
+                            <div class="mb-2 fw-bold">Harga Jual Total</div>
                             <div id="hargaJualTotal" style="font-size:28px;color:#493df1">
                                 Rp 0
                             </div>
@@ -768,7 +811,7 @@
                     <button class="btn btn-light" data-bs-dismiss="modal">
                         Batal
                     </button>
-                    <button class="btn text-white" style="background:#5f92ff" id="btnMasukCartRacik">
+                    <button class="text-white btn" style="background:#5f92ff" id="btnMasukCartRacik">
                         <i class="bi bi-cart-plus"></i> Masuk Keranjang
                     </button>
                 </div>
@@ -777,22 +820,21 @@
         </div>
     </div>
 
-    <div class="fab-wrapper">
-        <button class="fab-main" id="fabToggle">
-            <i class="bi bi-plus-lg"></i>
+    <div class="fab-wrapper" id="fabDashboard">
+        <a href="#" class="fab-item btn-info" data-label="Bantuan">
+            <i class="bi bi-question-circle-fill"></i>
+        </a>
+        <button class="fab-item btn-success" data-label="Quick Add User" data-bs-toggle="modal"
+            data-bs-target="#modalAddUser">
+            <i class="bi bi-person-plus-fill"></i>
         </button>
-
-        <a href="{{ route('SalesMstr.index') }}" class="fab-item" title="Sales">
-            <i class="bi bi-cash-stack"></i>
+        <a href="{{ route('home') }}" class="fab-item btn-warning" data-label="Dashboard Utama">
+            <i class="text-white bi bi-house-door-fill"></i>
         </a>
 
-        <a href="{{ route('Stock.index') }}" class="fab-item" title="Stock">
-            <i class="bi bi-box-seam"></i>
-        </a>
-
-        <a href="{{ route('CustMstr.index') }}" class="fab-item" title="Customer">
-            <i class="bi bi-people"></i>
-        </a>
+        <button class="fab-main" onclick="toggleFab()">
+            <i class="bi bi-grid-fill"></i>
+        </button>
     </div>
 
 
@@ -802,7 +844,7 @@
                 <div class="modal-content">
 
                     <div class="modal-header bg-danger">
-                        <h5 class="modal-title  text-white">
+                        <h5 class="text-white modal-title">
                             ⚠ Reminder Hutang Supplier
                         </h5>
                     </div>
@@ -985,7 +1027,7 @@
     //             Rp ${numfmt(item.price * item.qty)}
     //         </td>
     //         <td class="text-center">
-    //             <button type="button" class="btn btn-link text-danger p-0" onclick="removeBahan('${rowId}')">
+    //             <button type="button" class="p-0 btn btn-link text-danger" onclick="removeBahan('${rowId}')">
     //                 <i class="bi bi-trash"></i>
     //             </button>
     //         </td>
@@ -1021,7 +1063,7 @@
                 let row = `
         <tr>
             <td data-label="Produk"><strong>${item.name}</strong></td>
-            <td data-label="Qty"><input type="number" class="form-control form-control-sm text-center" value="${item.qty}"></td>
+            <td data-label="Qty"><input type="number" class="text-center form-control form-control-sm" value="${item.qty}"></td>
             <td data-label="Satuan">${item.unit_name}</td>
             <td data-label="Harga">Rp ${formatNumber(item.price)}</td>
             <td data-label="Diskon">Rp ${formatNumber(item.discount)}</td>
@@ -1059,9 +1101,17 @@
             });
         </script>
         <script>
-            document.getElementById('fabToggle').addEventListener('click', function() {
-                document.querySelector('.fab-wrapper').classList.toggle('active');
-            });
+            function toggleFab() {
+                document.getElementById('fabDashboard').classList.toggle('active');
+            }
+
+            // Close FAB jika klik di luar area
+            window.onclick = function(event) {
+                const fab = document.getElementById('fabDashboard');
+                if (!fab.contains(event.target) && fab.classList.contains('active')) {
+                    fab.classList.remove('active');
+                }
+            }
         </script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -1126,11 +1176,11 @@
                 </div>
                 <div class="text-end">
                     <div class="text-primary fw-bold">Rp ${price.toLocaleString('id-ID')}</div>
-                    <span class="badge bg-light text-dark border" style="font-size: 0.7rem;">Batch: ${batch}</span>
+                    <span class="border badge bg-light text-dark" style="font-size: 0.7rem;">Batch: ${batch}</span>
                 </div>
             </div>
             <div class="mt-1" style="font-size: 0.75rem;">
-                <span class="text-secondary italic">Expired: ${exp}</span>
+                <span class="italic text-secondary">Expired: ${exp}</span>
             </div>
         </div>
     `;
@@ -1217,11 +1267,11 @@
                 </div>
                 <div class="text-end">
                     <div class="text-primary fw-bold">Rp ${price.toLocaleString('id-ID')}</div>
-                    <span class="badge bg-light text-dark border" style="font-size: 0.7rem;">Batch: ${batch}</span>
+                    <span class="border badge bg-light text-dark" style="font-size: 0.7rem;">Batch: ${batch}</span>
                 </div>
             </div>
             <div class="mt-1" style="font-size: 0.75rem;">
-                <span class="text-secondary italic">Expired: ${exp}</span>
+                <span class="italic text-secondary">Expired: ${exp}</span>
             </div>
         </div>
     `;
@@ -1408,7 +1458,7 @@
                 $('#jumlahHasil').val(10);
                 $('#racikTableBody').html(`
             <tr id="racikEmpty">
-                <td colspan="6" class="text-center text-muted py-4">
+                <td colspan="6" class="py-4 text-center text-muted">
                     Belum ada bahan baku dipilih.
                 </td>
             </tr>

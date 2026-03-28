@@ -9,40 +9,59 @@
             <h3>Product Category Master</h3>
         </div>
         <div class="page-content">
-            <div class="card">
-                <div class="card-header">
-                    <button class="btn btn-outline-primary btn-sm rounded" type="button" onclick="openAddModal()">
-                        Add Category
+            <div class="card ux-card">
+                <div class="ux-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 text-primary fw-bold">
+                        <i class="bi bi-tags me-2"></i>Kategori Produk
+                    </h5>
+
+                    <button class="px-4 shadow-sm btn btn-primary fw-bold rounded-3" type="button"
+                        onclick="openAddModal()">
+                        <i class="bi bi-plus-lg me-2"></i>Add Category
                     </button>
                 </div>
+
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="productTable" class="table table-striped table-bordered table-sm nowrap"
-                            style="width:100%">
-                            <thead class="table-dark">
+                        <table id="productTable" class="table table-ux">
+                            <thead>
                                 <tr>
-                                    <th style="width:5%; text-align: center">No</th>
-                                    <th style="width:30%; text-align: center">Name</th>
-                                    <th style="text-align: center">Description</th>
-                                    <th style="width:15%; text-align: center">Action</th>
+                                    <th class="text-center" style="width:8%">No</th>
+                                    <th style="width:30%">Nama Kategori</th>
+                                    <th>Deskripsi</th>
+                                    <th class="text-center" style="width:15%">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($categories as $item)
                                     <tr>
-                                        <td class="text-center">{{ $loop->iteration }}</td>
-                                        <td>{{ $item->product_cat_name }}</td>
-                                        <td>{{ $item->product_cat_desc }}</td>
                                         <td class="text-center">
-                                            <button class="btn btn-info btn-sm"
-                                                onclick="editCategory({{ $item->product_cat_id }}, '{{ $item->product_cat_name }}', '{{ $item->product_cat_desc }}')">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
+                                            <span class="ux-sub-text fw-bold">{{ $loop->iteration }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="ux-main-text fw-bold text-dark">
+                                                {{ $item->product_cat_name }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="ux-sub-text">
+                                                {{ $item->product_cat_desc ?? '-' }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="gap-2 d-flex justify-content-center">
+                                                <button class="btn-ux-action btn-edit"
+                                                    onclick="editCategory({{ $item->product_cat_id }}, '{{ $item->product_cat_name }}', '{{ $item->product_cat_desc }}')"
+                                                    title="Edit Kategori">
+                                                    <i class="bi bi-pencil-fill"></i>
+                                                </button>
 
-                                            <button class="btn btn-danger btn-sm"
-                                                onclick="deleteCategory({{ $item->product_cat_id }})">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
+                                                <button class="btn-ux-action btn-delete"
+                                                    onclick="deleteCategory({{ $item->product_cat_id }})"
+                                                    title="Hapus Kategori">
+                                                    <i class="bi bi-trash3-fill"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -67,7 +86,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-12 mb-3">
+                            <div class="mb-3 col-12">
                                 <label class="form-label">Category Name</label>
                                 <input type="text" class="form-control" name="product_cat_name" id="input_name"
                                     required>

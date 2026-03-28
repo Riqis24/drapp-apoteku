@@ -196,71 +196,89 @@
     <style>
         .fab-wrapper {
             position: fixed;
-            bottom: 20px;
-            left: 20px;
+            bottom: 25px;
+            left: 25px;
             z-index: 9999;
-        }
-
-        /* FIX ICON CENTER */
-        .fab-main,
-        .fab-item {
             width: 56px;
             height: 56px;
-            border-radius: 50%;
+        }
+
+        /* Tombol Utama - Solid & Flat */
+        .fab-main {
+            width: 56px;
+            height: 56px;
+            background-color: #4c8ad1;
+            /* Orange Identitas */
+            color: #ffffff;
             border: none;
-            display: flex;
-            align-items: center;
-            /* center vertical */
-            justify-content: center;
-            /* center horizontal */
-            color: #fff;
-            background: #0d6efd;
-            font-size: 22px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            /* Presisi Center */
+            font-size: 24px;
             cursor: pointer;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, .25);
-            transition: all .3s ease;
-            text-decoration: none;
             padding: 0;
-            /* 🔥 penting */
-            line-height: 1;
-            /* 🔥 penting */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 10;
+            transition: background 0.2s;
         }
 
-        /* optional hover */
-        .fab-main:hover,
-        .fab-item:hover {
-            background: #0b5ed7;
-            transform: scale(1.08);
-        }
-
-        /* FAB ITEM POSITION */
+        /* Item Menu - Clean & Professional */
         .fab-item {
+            width: 46px;
+            height: 46px;
+            background-color: #ffffff;
+            color: #333333;
+            border: 1px solid #dddddd;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            /* Presisi Center */
             position: absolute;
-            left: 0;
+            left: 5px;
+            /* (56-46)/2 agar center horizontal */
             bottom: 0;
             opacity: 0;
-            pointer-events: none;
-            transform: translateY(0);
+            visibility: hidden;
+            text-decoration: none;
+            z-index: 5;
+            transition: transform 0.3s, opacity 0.2s;
         }
 
-        /* ACTIVE STATE */
+        /* Tanpa Bounce - Hanya Perubahan Warna Tipis */
+        .fab-item:hover {
+            background-color: #f1f1f1;
+            color: #4c8ad1;
+            border-color: #4c8ad1;
+        }
+
+        /* Active State - Muncul Flat */
+        .fab-wrapper.active .fab-main {
+            background-color: #222222;
+        }
+
         .fab-wrapper.active .fab-item {
             opacity: 1;
-            pointer-events: auto;
+            visibility: visible;
         }
 
-        /* 🔥 JARAK NAIK DIPERBESAR */
+        /* Jarak vertikal yang konsisten tanpa efek pegas */
+        .fab-wrapper.active .fab-item:nth-child(1) {
+            transform: translateY(-65px);
+        }
+
+        /* Customer */
         .fab-wrapper.active .fab-item:nth-child(2) {
-            transform: translateY(-80px);
+            transform: translateY(-120px);
         }
 
+        /* Stock */
         .fab-wrapper.active .fab-item:nth-child(3) {
-            transform: translateY(-160px);
+            transform: translateY(-175px);
         }
 
-        .fab-wrapper.active .fab-item:nth-child(4) {
-            transform: translateY(-240px);
-        }
+        /* Sales */
     </style>
     <style>
         /* Menghilangkan panah default select di beberapa browser jika perlu */
@@ -448,17 +466,17 @@
         }
     </style>
     {{-- <div id="main"> --}}
-    <div id="pos-wrapper" class="container-fluid p-0">
-        <div class="container-fluid px-3 mt-3">
-            <div class="pos-header mb-3">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                    <div class="card-body p-0">
+    <div id="pos-wrapper" class="p-0 container-fluid">
+        <div class="px-3 mt-3 container-fluid">
+            <div class="mb-3 pos-header">
+                <div class="overflow-hidden border-0 shadow-sm card rounded-4">
+                    <div class="p-0 card-body">
                         <div class="row g-0">
-                            <div class="col-md-3 bg-light-primary p-3 d-flex align-items-center border-end">
-                                <div class="col-md-3 bg-light-primary p-3 d-flex align-items-center border-end">
+                            <div class="p-3 col-md-3 bg-light-primary d-flex align-items-center border-end">
+                                <div class="p-3 col-md-3 bg-light-primary d-flex align-items-center border-end">
                                     <div class="avatar-custom-wrapper me-3">
                                         <img src="{{ asset('assets/images/cashier.png') }}" alt=""
-                                            class="d-none d-md-block mx-auto" style="width: 100%;">
+                                            class="mx-auto d-none d-md-block" style="width: 100%;">
                                     </div>
                                 </div>
                                 <div class="overflow-hidden">
@@ -477,8 +495,8 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6 p-2 d-flex align-items-center">
-                                <div class="row w-100 g-3 px-2">
+                            <div class="p-2 col-md-6 d-flex align-items-center">
+                                <div class="px-2 row w-100 g-3">
                                     <div class="col-6 border-end">
                                         <label class="pos-label-mini">Outlet</label>
                                         <select class="form-select pos-select-minimal" name="location" id="location">
@@ -502,7 +520,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-3 p-3 bg-white d-flex align-items-center justify-content-end gap-2">
+                            <div class="gap-2 p-3 bg-white col-md-3 d-flex align-items-center justify-content-end">
                                 <div class="text-end me-3 d-none d-lg-block">
                                     <small class="text-muted d-block fw-bold" style="font-size: 0.6rem;">SESSION
                                         TOTAL</small>
@@ -510,12 +528,12 @@
                                             id="grandTotal2">0</span>
                                     </h5>
                                 </div>
-                                <div class="btn-group shadow-sm">
-                                    <button class="btn btn-white btn-sm border" data-bs-toggle="modal"
+                                <div class="shadow-sm btn-group">
+                                    <button class="border btn btn-white btn-sm" data-bs-toggle="modal"
                                         data-bs-target="#openCashierModal" title="Buka Kasir">
                                         <i class="bi bi-door-open text-success"></i>
                                     </button>
-                                    <button class="btn btn-white btn-sm border" id="closeCashierBtn"
+                                    <button class="border btn btn-white btn-sm" id="closeCashierBtn"
                                         title="Tutup Kasir">
                                         <i class="bi bi-door-closed text-danger"></i>
                                     </button>
@@ -528,51 +546,51 @@
         </div>
         <div class="container-fluid">
             <div class="card card-body">
-                <div class="card border-0 shadow-sm rounded-4 mb-3">
+                <div class="mb-3 border-0 shadow-sm card rounded-4">
                     <div class="row g-3">
                         <div class="col-lg-9">
-                            <div class="card border-0 shadow-sm rounded-4 mb-3">
-                                <div class="card-body p-3">
-                                    <div class="row g-2 mb-3">
+                            <div class="mb-3 border-0 shadow-sm card rounded-4">
+                                <div class="p-3 card-body">
+                                    <div class="mb-3 row g-2">
                                         <div class="col-md-9">
-                                            <div class="form-group mb-0">
-                                                <label class="pos-label-mini mb-1">Cari Produk (F2)</label>
-                                                <select id="itemInput" class="form-select border-2 shadow-none"
+                                            <div class="mb-0 form-group">
+                                                <label class="mb-1 pos-label-mini">Cari Produk (F2)</label>
+                                                <select id="itemInput" class="border-2 shadow-none form-select"
                                                     style="border-radius: 10px; height: 45px;">
                                                     <option></option>
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="d-none d-md-block pos-label-mini mb-1">&nbsp;</label>
+                                            <label class="mb-1 d-none d-md-block pos-label-mini">&nbsp;</label>
                                             <button type="button"
-                                                class="btn shadow-sm d-flex align-items-center justify-content-center"
+                                                class="shadow-sm btn d-flex align-items-center justify-content-center"
                                                 id="btn-buka-resep"
                                                 style="background-color: #74bcff; border-radius: 10px; height: 45px; width:100%"
                                                 data-bs-toggle="modal" data-bs-target="#modalRacik">
-                                                <i class="bi bi-capsule-pill me-2 text-white"></i>
+                                                <i class="text-white bi bi-capsule-pill me-2"></i>
                                                 <span class="text-white fw-bold small">Racik (F3)</span>
                                             </button>
                                         </div>
                                     </div>
 
-                                    <div class="row g-3 pt-3 border-top">
+                                    <div class="pt-3 row g-3 border-top">
                                         <div class="col-md-6">
-                                            <label class="pos-label-mini mb-1">Diskon Global</label>
+                                            <label class="mb-1 pos-label-mini">Diskon Global</label>
                                             <div class="input-group">
-                                                <select id="disc_global_type" class="form-select fw-bold border-2"
+                                                <select id="disc_global_type" class="border-2 form-select fw-bold"
                                                     style="max-width: 80px; border-radius: 10px 0 0 10px;">
                                                     <option value="amount">Rp</option>
                                                     <option value="percent">%</option>
                                                 </select>
                                                 <input type="number" id="disc_global_value"
-                                                    class="form-control text-end fw-bold border-2"
+                                                    class="border-2 form-control text-end fw-bold"
                                                     style="border-radius: 0 10px 10px 0;" value="0">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="pos-label-mini mb-1">Pajak (PPN)</label>
-                                            <select id="ppn_type" class="form-select fw-bold border-2"
+                                            <label class="mb-1 pos-label-mini">Pajak (PPN)</label>
+                                            <select id="ppn_type" class="border-2 form-select fw-bold"
                                                 style="border-radius: 10px; height: 40px;">
                                                 <option value="none">Non PPN</option>
                                                 <option value="include">PPN 11%</option>
@@ -582,12 +600,12 @@
                                 </div>
                             </div>
 
-                            <div class="card border-0 shadow-sm rounded-4">
+                            <div class="border-0 shadow-sm card rounded-4">
                                 <div class="card-body">
-                                    <div class="card shadow-sm border-0">
-                                        <div class="card-body p-0">
+                                    <div class="border-0 shadow-sm card">
+                                        <div class="p-0 card-body">
                                             <div class="table-responsive-sm">
-                                                <table class="table pos-table mb-0 responsive-cart-table"
+                                                <table class="table mb-0 pos-table responsive-cart-table"
                                                     id="cartTable">
                                                     <thead>
                                                         <tr>
@@ -612,38 +630,38 @@
 
                         <div class="col-lg-3">
                             <div class="sticky-top" style="top: 20px;">
-                                <div class="card border-0 shadow rounded-4 overflow-hidden">
-                                    <div class="bg-light p-3 border-bottom">
+                                <div class="overflow-hidden border-0 shadow card rounded-4">
+                                    <div class="p-3 bg-light border-bottom">
                                         <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-receipt me-2"></i>Ringkasan
                                             Pesanan</h6>
                                     </div>
 
-                                    <div class="card-body p-3">
-                                        <div class="billing-details mb-3">
-                                            <div class="d-flex justify-content-between mb-1">
+                                    <div class="p-3 card-body">
+                                        <div class="mb-3 billing-details">
+                                            <div class="mb-1 d-flex justify-content-between">
                                                 <span class="text-muted small">Subtotal</span>
                                                 <strong id="subtotal" class="text-dark">Rp 0</strong>
                                             </div>
-                                            <div class="d-flex justify-content-between text-warning mb-1">
+                                            <div class="mb-1 d-flex justify-content-between text-warning">
                                                 <span class="small">Diskon Global</span>
                                                 <strong id="discGlobal">Rp 0</strong>
                                             </div>
-                                            <div class="d-flex justify-content-between mb-1">
+                                            <div class="mb-1 d-flex justify-content-between">
                                                 <span class="text-muted small">PPN 11%</span>
                                                 <strong id="ppnVal" class="text-dark">Rp 0</strong>
                                             </div>
                                         </div>
 
-                                        <div class="bg-primary text-white rounded-3 p-3 mb-4 shadow-sm">
+                                        <div class="p-3 mb-4 text-white shadow-sm bg-primary rounded-3">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <span class="small fw-bold opacity-75">TOTAL</span>
+                                                <span class="opacity-75 small fw-bold">TOTAL</span>
                                                 <span id="grandTotal" class="fs-4 fw-bold">Rp 0</span>
                                             </div>
                                         </div>
 
-                                        <div class="mb-3 pt-2 border-top">
-                                            <label class="pos-label-mini mb-2">Jenis Transaksi</label>
-                                            <select class="form-select border-2 fw-bold" name="payment_type"
+                                        <div class="pt-2 mb-3 border-top">
+                                            <label class="mb-2 pos-label-mini">Jenis Transaksi</label>
+                                            <select class="border-2 form-select fw-bold" name="payment_type"
                                                 id="payment_type"
                                                 style="border-radius: 10px; height: 45px; background-color: #f8fafc;"
                                                 onchange="togglePaymentMethod(this.value)">
@@ -653,8 +671,8 @@
                                         </div>
 
                                         <div id="payment_method_wrapper" class="mb-3">
-                                            <label class="pos-label-mini mb-2">Metode Pembayaran</label>
-                                            <select class="form-select border-2 fw-bold" name="payment_method"
+                                            <label class="mb-2 pos-label-mini">Metode Pembayaran</label>
+                                            <select class="border-2 form-select fw-bold" name="payment_method"
                                                 id="payment_method"
                                                 style="border-radius: 10px; height: 45px; border-color: #e2e8f0;">
                                                 <option value="cash">💵 Cash / Tunai</option>
@@ -665,46 +683,46 @@
                                         </div>
 
                                         <div class="mb-3" id="payment_input_wrapper">
-                                            <label class="pos-label-mini mb-1">Uang Diterima (F8)</label>
+                                            <label class="mb-1 pos-label-mini">Uang Diterima (F8)</label>
                                             <div class="input-group">
                                                 <span
-                                                    class="input-group-text bg-light border-2 border-end-0 text-muted fw-bold"
+                                                    class="border-2 input-group-text bg-light border-end-0 text-muted fw-bold"
                                                     style="border-radius: 12px 0 0 12px;">Rp</span>
                                                 <input type="number" id="paymentInput"
-                                                    class="form-control form-control-lg text-end fw-bold border-2 border-start-0 shadow-none"
+                                                    class="border-2 shadow-none form-control form-control-lg text-end fw-bold border-start-0"
                                                     placeholder="0" min="0" inputmode="numeric"
                                                     style="border-radius: 0 12px 12px 0; font-size: 1.6rem; color: #435ebe; height: 60px;">
                                             </div>
                                         </div>
 
-                                        <div class="mb-4 p-3 rounded-3"
+                                        <div class="p-3 mb-4 rounded-3"
                                             style="background-color: #f8fafc; border: 1px dashed #cbd5e1;">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <span class="pos-label-mini mb-0">Kembalian</span>
+                                                <span class="mb-0 pos-label-mini">Kembalian</span>
                                                 <input type="number" id="change"
-                                                    class="form-control border-0 bg-transparent p-0 text-end text-success fw-bold fs-5"
+                                                    class="p-0 bg-transparent border-0 form-control text-end text-success fw-bold fs-5"
                                                     value="0" readonly>
                                             </div>
                                         </div>
 
-                                        <div class="d-grid gap-2">
-                                            <button class="btn btn-success btn-lg fw-bold py-3 shadow-sm mb-1"
+                                        <div class="gap-2 d-grid">
+                                            <button class="py-3 mb-1 shadow-sm btn btn-success btn-lg fw-bold"
                                                 id="button_pay"
                                                 style="border-radius: 12px; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border: none;">
                                                 <i class="bi bi-printer-fill me-2"></i> BAYAR SEKARANG <br>
-                                                <small class="fw-normal opacity-75" style="font-size: 0.7rem;">(ALT +
+                                                <small class="opacity-75 fw-normal" style="font-size: 0.7rem;">(ALT +
                                                     P)</small>
                                             </button>
 
                                             <div class="row g-2">
                                                 <div class="col-6">
-                                                    <button class="btn btn-outline-secondary w-100 py-2 fw-semibold"
+                                                    <button class="py-2 btn btn-outline-secondary w-100 fw-semibold"
                                                         id="button_hold" style="border-radius: 10px;">
                                                         <i class="bi bi-pause-fill"></i> Hold (H)
                                                     </button>
                                                 </div>
                                                 <div class="col-6">
-                                                    <button class="btn btn-outline-info w-100 py-2 fw-semibold"
+                                                    <button class="py-2 btn btn-outline-info w-100 fw-semibold"
                                                         id="button_hold_list" style="border-radius: 10px;">
                                                         <i class="bi bi-list-ul"></i> List
                                                     </button>
@@ -732,7 +750,7 @@
             </td>
 
             <td data-label="Qty">
-                <input type="number" class="form-control form-control-sm qty text-center mx-md-auto" value="1"
+                <input type="number" class="text-center form-control form-control-sm qty mx-md-auto" value="1"
                     min="1" step="any" style="max-width: 80px;">
             </td>
 
@@ -779,7 +797,7 @@
             </td>
 
             <td class="text-center">
-                <button class="btn btn-sm btn-outline-danger removerow border-0">
+                <button class="border-0 btn btn-sm btn-outline-danger removerow">
                     <i class="bi bi-trash"></i> <span class="d-md-none">Hapus</span>
                 </button>
             </td>
@@ -789,29 +807,29 @@
 
     <div class="modal fade" id="holdListModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 1.25rem;">
-                <div class="modal-header border-0 pb-0"
+            <div class="border-0 shadow-lg modal-content" style="border-radius: 1.25rem;">
+                <div class="pb-0 border-0 modal-header"
                     style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 1.25rem 1.25rem 0 0;">
                     <div class="d-flex align-items-center">
-                        <div class="bg-warning bg-opacity-10 p-2 rounded-3 me-3">
+                        <div class="p-2 bg-warning bg-opacity-10 rounded-3 me-3">
                             <i class="bi bi-pause-btn-fill text-warning fs-4"></i>
                         </div>
                         <div>
-                            <h5 class="modal-title fw-bold mb-0">Transaksi Tertunda</h5>
+                            <h5 class="mb-0 modal-title fw-bold">Transaksi Tertunda</h5>
                             <small class="text-muted">Daftar transaksi yang sedang di-hold</small>
                         </div>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <div class="modal-body p-4">
+                <div class="p-4 modal-body">
                     <div class="table-responsive">
                         <table class="table align-middle custom-table">
                             <thead class="bg-light">
                                 <tr>
-                                    <th class="border-0 text-uppercase small fw-bold py-3 ps-4">No. Sales Order</th>
-                                    <th class="border-0 text-uppercase small fw-bold py-3 text-end">Total Nominal</th>
-                                    <th class="border-0 text-uppercase small fw-bold py-3 text-center">Aksi</th>
+                                    <th class="py-3 border-0 text-uppercase small fw-bold ps-4">No. Sales Order</th>
+                                    <th class="py-3 border-0 text-uppercase small fw-bold text-end">Total Nominal</th>
+                                    <th class="py-3 text-center border-0 text-uppercase small fw-bold">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="holdListBody">
@@ -819,18 +837,18 @@
                                     <tr class="hold-row">
                                         <td class="ps-4">
                                             <div class="fw-bold text-dark">{{ $hold->sales_mstr_nbr ?? '-' }}</div>
-                                            <div class="mt-2 d-flex flex-wrap gap-1">
+                                            <div class="flex-wrap gap-1 mt-2 d-flex">
                                                 @foreach ($hold->details as $detail)
                                                     @if ($detail->sales_det_type == 'racikan' || !$detail->product->id)
                                                         <span
-                                                            class="badge bg-soft-warning text-warning border border-warning"
+                                                            class="border badge bg-soft-warning text-warning border-warning"
                                                             style="font-size: 0.75rem;">
                                                             <i class="bi bi-capsule-pill me-1"></i>
                                                             {{ $detail->prescription->pres_mstr_name ?? 'Racikan' }}
                                                             <small>x{{ number_format($detail->sales_det_qty, 0) }}</small>
                                                         </span>
                                                     @else
-                                                        <span class="badge bg-light text-secondary border"
+                                                        <span class="border badge bg-light text-secondary"
                                                             style="font-size: 0.75rem; font-weight: 500;">
                                                             {{ $detail->product->name ?? 'Unknown' }}
                                                             <small
@@ -848,7 +866,7 @@
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <div class="d-flex justify-content-center gap-2">
+                                            <div class="gap-2 d-flex justify-content-center">
                                                 <button class="btn btn-sm btn-action btn-primary"
                                                     onclick="resumeHold({{ $hold->sales_mstr_id }})"
                                                     title="Lanjutkan">
@@ -864,8 +882,8 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="text-center py-5">
-                                            <i class="bi bi-inbox text-muted fs-1 d-block mb-3"></i>
+                                        <td colspan="3" class="py-5 text-center">
+                                            <i class="mb-3 bi bi-inbox text-muted fs-1 d-block"></i>
                                             <span class="text-muted">Tidak ada transaksi yang tertunda.</span>
                                         </td>
                                     </tr>
@@ -883,7 +901,7 @@
         @csrf
         <div class="modal fade" id="openCashierModal" tabindex="-1">
             <div class="modal-dialog">
-                <div class="modal-content p-3">
+                <div class="p-3 modal-content">
                     <h5>Buka Kasir</h5>
                     <div class="mb-2">
                         <label>Lokasi</label>
@@ -912,7 +930,7 @@
             <div class="modal-content">
 
                 <!-- Header -->
-                <div class="modal-header text-white" style="background:#adc7fd">
+                <div class="text-white modal-header" style="background:#adc7fd">
                     <h5 class="modal-title">
                         <i class="bi bi-pill"></i> Buat Obat Racikan (Resep)
                     </h5>
@@ -923,16 +941,16 @@
                     <div class="p-3 mb-4 rounded-3" style="background: #f0f7ff; border: 1px dashed #adc7fd;">
                         <div class="row align-items-end g-2">
                             <div class="col-md-9">
-                                <label class="pos-label-mini mb-1 text-primary">
+                                <label class="mb-1 pos-label-mini text-primary">
                                     <i class="bi bi-clock-history"></i> Copy dari Racikan Sebelumnya (History)
                                 </label>
-                                <select id="copyHistoryRacik" class="form-select border-2 shadow-none"
+                                <select id="copyHistoryRacik" class="border-2 shadow-none form-select"
                                     style="border-radius: 10px;">
                                     <option value="">-- Cari Nama Racikan / Resep Lama --</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <button type="button" class="btn btn-primary w-100 fw-bold shadow-sm"
+                                <button type="button" class="shadow-sm btn btn-primary w-100 fw-bold"
                                     id="btnApplyCopy" style="height: 40px; border-radius: 10px;">
                                     <i class="bi bi-clipboard-check"></i> Gunakan
                                 </button>
@@ -945,17 +963,17 @@
                         </div>
                     </div>
 
-                    <div class="row mb-3">
+                    <div class="mb-3 row">
                         <div class="col-md-8">
-                            <label class="pos-label-mini mb-1">Nama Racikan Baru</label>
-                            <input type="text" id="namaRacikan" class="form-control border-2 fw-bold"
+                            <label class="mb-1 pos-label-mini">Nama Racikan Baru</label>
+                            <input type="text" id="namaRacikan" class="border-2 form-control fw-bold"
                                 placeholder="Cth: Puyer Batuk Anak..." style="border-radius: 10px; height: 45px;">
                         </div>
                         <div class="col-md-4">
-                            <label class="pos-label-mini mb-1">Jumlah Hasil (Bungkus/Kapsul)</label>
+                            <label class="mb-1 pos-label-mini">Jumlah Hasil (Bungkus/Kapsul)</label>
                             <div class="input-group">
                                 <input type="number" id="jumlahHasil"
-                                    class="form-control border-2 text-center fw-bold" value="10"
+                                    class="text-center border-2 form-control fw-bold" value="10"
                                     style="border-radius: 10px 0 0 10px; height: 45px;">
                                 <select name="umRacik" id="umRacik" class="form-select" style="max-width: 150px;">
                                     <option value="">--satuan--</option>
@@ -975,7 +993,7 @@
 
                     <!-- Table -->
                     <div class="table-responsive">
-                        <table class="table table-bordered align-middle">
+                        <table class="table align-middle table-bordered">
                             <thead class="table-light">
                                 <tr>
                                     <th>Nama Bahan</th>
@@ -988,7 +1006,7 @@
                             </thead>
                             <tbody id="racikTableBody">
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted py-4" id="racikEmpty">
+                                    <td colspan="6" class="py-4 text-center text-muted" id="racikEmpty">
                                         Belum ada bahan baku dipilih.<br>
                                         Gunakan pencarian di atas untuk menambahkan obat.
                                     </td>
@@ -998,7 +1016,7 @@
                     </div>
 
                     <!-- Summary -->
-                    <div class="row mt-3">
+                    <div class="mt-3 row">
                         <div class="col-md-8">
                             <div class="p-3 rounded" style="background:#fffbe6">
                                 <div class="mb-2 d-flex justify-content-between align-items-center">
@@ -1021,7 +1039,7 @@
                         </div>
 
                         <div class="col-md-4 text-end">
-                            <div class="fw-bold mb-2">Harga Jual Total</div>
+                            <div class="mb-2 fw-bold">Harga Jual Total</div>
                             <div id="hargaJualTotal" style="font-size:28px;color:#493df1">
                                 Rp 0
                             </div>
@@ -1036,7 +1054,7 @@
                     <button class="btn btn-light" data-bs-dismiss="modal">
                         Batal
                     </button>
-                    <button class="btn text-white" style="background:#5f92ff" id="btnMasukCartRacik">
+                    <button class="text-white btn" style="background:#5f92ff" id="btnMasukCartRacik">
                         <i class="bi bi-cart-plus"></i> Masuk Keranjang
                     </button>
                 </div>
@@ -1045,23 +1063,25 @@
         </div>
     </div>
 
-    <div class="fab-wrapper">
-        <button class="fab-main" id="fabToggle">
-            <i class="bi bi-plus-lg"></i>
-        </button>
-
-        <a href="{{ route('SalesMstr.index') }}" class="fab-item" title="Sales">
-            <i class="bi bi-cash-stack"></i>
+    <div class="fab-wrapper" id="fabDashboard">
+        <a href="{{ route('CustMstr.index') }}" class="fab-item" title="Customer">
+            <i class="bi bi-people"></i>
         </a>
 
         <a href="{{ route('Stock.index') }}" class="fab-item" title="Stock">
             <i class="bi bi-box-seam"></i>
         </a>
 
-        <a href="{{ route('CustMstr.index') }}" class="fab-item" title="Customer">
-            <i class="bi bi-people"></i>
+        <a href="{{ route('SalesMstr.index') }}" class="fab-item" title="Sales">
+            <i class="bi bi-cash-stack"></i>
         </a>
+
+        <button class="fab-main" id="fabToggle">
+            <i class="bi bi-plus-lg"></i>
+        </button>
     </div>
+
+
 
 
     @if ($dueAps->count() > 0)
@@ -1070,7 +1090,7 @@
                 <div class="modal-content">
 
                     <div class="modal-header bg-danger">
-                        <h5 class="modal-title  text-white">
+                        <h5 class="text-white modal-title">
                             ⚠ Reminder Hutang Supplier
                         </h5>
                     </div>
@@ -1368,7 +1388,7 @@
                 let row = `
         <tr>
             <td data-label="Produk"><strong>${item.name}</strong></td>
-            <td data-label="Qty"><input type="number" class="form-control form-control-sm text-center" value="${item.qty}"></td>
+            <td data-label="Qty"><input type="number" class="text-center form-control form-control-sm" value="${item.qty}"></td>
             <td data-label="Satuan">${item.unit_name}</td>
             <td data-label="Harga">Rp ${formatNumber(item.price)}</td>
             <td data-label="Diskon">Rp ${formatNumber(item.discount)}</td>
@@ -1411,9 +1431,20 @@
             });
         </script>
         <script>
-            document.getElementById('fabToggle').addEventListener('click', function() {
-                document.querySelector('.fab-wrapper').classList.toggle('active');
-            });
+            const container = document.getElementById('fabDashboard');
+            const toggle = document.getElementById('fabToggle');
+
+            toggle.onclick = (e) => {
+                e.stopPropagation();
+                container.classList.toggle('active');
+            };
+
+            // Close saat klik area lain
+            document.onclick = (e) => {
+                if (!container.contains(e.target)) {
+                    container.classList.remove('active');
+                }
+            };
         </script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -1478,11 +1509,11 @@
                 </div>
                 <div class="text-end">
                     <div class="text-primary fw-bold">Rp ${price.toLocaleString('id-ID')}</div>
-                    <span class="badge bg-light text-dark border" style="font-size: 0.7rem;">Batch: ${batch}</span>
+                    <span class="border badge bg-light text-dark" style="font-size: 0.7rem;">Batch: ${batch}</span>
                 </div>
             </div>
             <div class="mt-1" style="font-size: 0.75rem;">
-                <span class="text-secondary italic">Expired: ${exp}</span>
+                <span class="italic text-secondary">Expired: ${exp}</span>
             </div>
         </div>
     `;
@@ -1569,11 +1600,11 @@
                 </div>
                 <div class="text-end">
                     <div class="text-primary fw-bold">Rp ${price.toLocaleString('id-ID')}</div>
-                    <span class="badge bg-light text-dark border" style="font-size: 0.7rem;">Batch: ${batch}</span>
+                    <span class="border badge bg-light text-dark" style="font-size: 0.7rem;">Batch: ${batch}</span>
                 </div>
             </div>
             <div class="mt-1" style="font-size: 0.75rem;">
-                <span class="text-secondary italic">Expired: ${exp}</span>
+                <span class="italic text-secondary">Expired: ${exp}</span>
             </div>
         </div>
     `;
@@ -1761,7 +1792,7 @@
                 $('#jumlahHasil').val(10);
                 $('#racikTableBody').html(`
             <tr id="racikEmpty">
-                <td colspan="6" class="text-center text-muted py-4">
+                <td colspan="6" class="py-4 text-center text-muted">
                     Belum ada bahan baku dipilih.
                 </td>
             </tr>
@@ -2972,7 +3003,7 @@
                         title: 'Konfirmasi Tutup Kasir',
                         html: `
                 <p>Masukkan total uang fisik di laci (Cash):</p>
-                <div class="input-group mb-3">
+                <div class="mb-3 input-group">
                     <span class="input-group-text">Rp</span>
                     <input type="number" id="swal-closing-amount" class="form-control" placeholder="0" autofocus>
                 </div>

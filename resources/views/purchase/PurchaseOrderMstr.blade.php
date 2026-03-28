@@ -9,101 +9,120 @@
             <h3>Purchase Order</h3>
         </div>
         <div class="page-content">
-            <div class="card">
-                <div class="card-header bg-white py-3">
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                        <div>
-                            <button class="btn btn-outline-primary btn-sm rounded" type="button"
-                                onclick="window.location.href='{{ route('PurchaseOrder.create') }}'">
-                                Create PO
-                            </button>
-                        </div>
+            <div class="card ux-card">
+                <div class="ux-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 text-primary fw-bold">
+                        <i class="bi bi-cart-check me-2"></i>Purchase Order
+                    </h5>
 
-                        <div class="flex-grow-1">
-                            <form action="{{ route('PurchaseOrder.index') }}" method="GET"
-                                class="row g-2 justify-content-md-end align-items-end">
-                                <div class="col-6 col-md-3 col-lg-2">
-                                    <label class="form-label small mb-1 fw-bold">Dari Tanggal</label>
-                                    <input type="date" name="start_date" class="form-control form-control-sm"
-                                        value="{{ request('start_date') }}">
-                                </div>
-                                <div class="col-6 col-md-3 col-lg-2">
-                                    <label class="form-label small mb-1 fw-bold">Sampai Tanggal</label>
-                                    <input type="date" name="end_date" class="form-control form-control-sm"
-                                        value="{{ request('end_date') }}">
-                                </div>
-                                <div class="col-12 col-md-auto">
-                                    <div class="btn-group w-100">
-                                        <button type="submit" class="btn btn-sm btn-primary">
-                                            <i class="bi bi-filter"></i> Filter
-                                        </button>
-                                        <a href="{{ route('PurchaseOrder.index') }}" class="btn btn-sm btn-secondary">
-                                            <i class="bi bi-arrow-clockwise"></i> Reset
-                                        </a>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                    <button class="px-4 shadow-sm btn btn-primary fw-bold rounded-3" type="button"
+                        onclick="window.location.href='{{ route('PurchaseOrder.create') }}'">
+                        <i class="bi bi-plus-lg me-2"></i>Create PO
+                    </button>
                 </div>
+
                 <div class="card-body">
+                    <div class="ux-filter-area">
+                        <form action="{{ route('PurchaseOrder.index') }}" method="GET"
+                            class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label ux-sub-text fw-bold">DARI TANGGAL</label>
+                                <input type="date" name="start_date" class="border-0 shadow-sm form-control"
+                                    value="{{ request('start_date') }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label ux-sub-text fw-bold">SAMPAI TANGGAL</label>
+                                <input type="date" name="end_date" class="border-0 shadow-sm form-control"
+                                    value="{{ request('end_date') }}">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="px-4 shadow-sm btn btn-primary fw-bold rounded-3">
+                                    <i class="bi bi-filter"></i> Apply
+                                </button>
+                                <a href="{{ route('PurchaseOrder.index') }}"
+                                    class="px-4 btn btn-light ms-2 rounded-3 text-muted">
+                                    Reset
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+
                     <div class="table-responsive">
-                        <table id="PoTable" class="table table-striped table-bordered table-sm nowrap">
-                            <thead class="table-dark">
+                        <table id="PoTable" class="table table-ux">
+                            <thead>
                                 <tr>
-                                    <th style="text-align: center">No</th>
-                                    <th style="text-align: center">Tanggal</th>
-                                    <th style="text-align: center">PO #</th>
-                                    <th style="text-align: center">Supplier</th>
-                                    <th style="text-align: center">ETA</th>
-                                    <th style="text-align: center">Sub Total</th>
-                                    <th style="text-align: center">Discount</th>
-                                    <th style="text-align: center">PPN</th>
-                                    <th style="text-align: center">Grand Total</th>
-                                    <th style="text-align: center">Remark</th>
-                                    <th style="text-align: center">Payment</th>
-                                    <th style="text-align: center">Jatuh Tempo</th>
-                                    {{-- <th style="text-align: center">Created By</th> --}}
-                                    <th style="text-align: center">Created At</th>
-                                    <th style="text-align: center">Aksi</th>
+                                    <th class="text-center" style="width:5%">No</th>
+                                    <th>Info PO</th>
+                                    <th>Supplier</th>
+                                    <th class="text-center">Estimasi (ETA)</th>
+                                    <th class="text-end">Rincian Biaya</th>
+                                    <th>Payment & Tempo</th>
+                                    <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($orders as $item)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        {{-- <td>{{ $item->po_mstr_date }}</td> --}}
-                                        <td>{{ $item->po_mstr_createdat }}</td>
-                                        <td>{{ $item->po_mstr_nbr }}</td>
-                                        <td>{{ $item->supplier->supp_mstr_name }}</td>
-                                        <td>{{ $item->po_mstr_eta }}</td>
-                                        <td>{{ rupiah($item->po_mstr_subtotal) }}</td>
-                                        <td>{{ rupiah($item->po_mstr_discamt) }}</td>
-                                        <td>{{ rupiah($item->po_mstr_ppnamt) }}</td>
-                                        <td>{{ rupiah($item->po_mstr_grandtotal) }}</td>
-                                        <td>{{ $item->po_mstr_payment }}</td>
-                                        <td>{{ $item->po_mstr_duedate }}</td>
-                                        <td>{{ $item->po_mstr_note }}</td>
-                                        <td>{{ $item->user->user_mstr_name }}</td>
+                                        <td class="text-center">
+                                            <span class="ux-sub-text fw-bold">{{ $loop->iteration }}</span>
+                                        </td>
                                         <td>
-                                            <button class="btn btn-sm btn-info" type="button"
-                                                onclick="window.open('{{ route('PurchaseOrder.show', $item->po_mstr_id) }}')">
-                                                <i class="bi bi-folder"></i>
-                                            </button>
-                                            <form id="delete-po-{{ $item->po_mstr_id }}"
-                                                action="{{ route('PurchaseOrderList.destroy', $item->po_mstr_id) }}"
-                                                method="POST" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="button" class="btn btn-sm btn-danger"
-                                                    onclick="confirmDeletePo('{{ $item->po_mstr_id }}', '{{ $item->po_mstr_nbr }}')">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
-                                            {{-- <button type="button" class="btn btn-sm btn-warning rounded"
-                                                onclick="window.location.href='{{ route('PrMstr.create', $item->po_mstr_id) }}'">
-                                                <i class="bi bi-cart-dash"></i>
-                                            </button> --}}
+                                            <span class="ux-main-text text-primary">{{ $item->po_mstr_nbr }}</span>
+                                            <span class="ux-sub-text">Tgl:
+                                                {{ \Carbon\Carbon::parse($item->po_mstr_createdat)->format('d/m/Y') }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="ux-main-text">{{ $item->supplier->supp_mstr_name }}</span>
+                                            <span class="ux-sub-text small">By: {{ $item->user->user_mstr_name }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="px-2 border badge bg-light text-dark fw-normal">
+                                                {{ $item->po_mstr_eta ?? '-' }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="ux-sub-text small text-muted" style="line-height: 1.2">
+                                                Sub: {{ rupiah($item->po_mstr_subtotal) }}<br>
+                                                Disc: <span
+                                                    class="text-danger">-{{ rupiah($item->po_mstr_discamt) }}</span><br>
+                                                Tax: <span
+                                                    class="text-success">+{{ rupiah($item->po_mstr_ppnamt) }}</span>
+                                            </div>
+                                            <span
+                                                class="mt-1 ux-amount d-block">{{ rupiah($item->po_mstr_grandtotal) }}</span>
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="ux-main-text small text-uppercase">{{ $item->po_mstr_payment }}</span>
+                                            <span class="ux-sub-text small">Due:
+                                                {{ $item->po_mstr_duedate ?? '-' }}</span>
+                                            @if ($item->po_mstr_note)
+                                                <span class="ux-sub-text x-small text-italic text-truncate d-block"
+                                                    style="max-width: 150px;">
+                                                    "{{ $item->po_mstr_note }}"
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="gap-2 d-flex justify-content-center">
+                                                <a href="#"
+                                                    onclick="window.open('{{ route('PurchaseOrder.show', $item->po_mstr_id) }}')"
+                                                    class="btn-ux-action btn-view" title="Detail PO">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+
+                                                <form id="delete-po-{{ $item->po_mstr_id }}"
+                                                    action="{{ route('PurchaseOrderList.destroy', $item->po_mstr_id) }}"
+                                                    method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="button" class="btn-ux-action btn-delete"
+                                                        onclick="confirmDeletePo('{{ $item->po_mstr_id }}', '{{ $item->po_mstr_nbr }}')"
+                                                        title="Hapus">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -111,7 +130,6 @@
                         </table>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>

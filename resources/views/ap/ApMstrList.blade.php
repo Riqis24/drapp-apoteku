@@ -9,82 +9,103 @@
             <h3>Utang Usaha</h3>
         </div>
         <div class="page-content">
-            <div class="card">
-                <div class="card-header bg-white py-3">
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                        <div>
-                            <button class="btn btn-outline-primary btn-sm rounded" type="button"
-                                onclick="window.open('{{ route('AppayMstr.create') }}', '_blank')">
-                                <i class="bi bi-cash me-2"></i>Pay
-                            </button>
-                        </div>
+            <div class="card ux-card">
+                <div class="ux-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 text-primary fw-bold">
+                        <i class="bi bi-wallet2 me-2"></i>Accounts Payable
+                    </h5>
 
-                        <div class="flex-grow-1">
-                            <form action="{{ route('ApMstr.index') }}" method="GET"
-                                class="row g-2 justify-content-md-end align-items-end">
-                                <div class="col-6 col-md-3 col-lg-2">
-                                    <label class="form-label small mb-1 fw-bold">Dari Tanggal</label>
-                                    <input type="date" name="start_date" class="form-control form-control-sm"
-                                        value="{{ request('start_date') }}">
-                                </div>
-                                <div class="col-6 col-md-3 col-lg-2">
-                                    <label class="form-label small mb-1 fw-bold">Sampai Tanggal</label>
-                                    <input type="date" name="end_date" class="form-control form-control-sm"
-                                        value="{{ request('end_date') }}">
-                                </div>
-                                <div class="col-12 col-md-auto">
-                                    <div class="btn-group w-100">
-                                        <button type="submit" class="btn btn-sm btn-primary">
-                                            <i class="bi bi-filter"></i> Filter
-                                        </button>
-                                        <a href="{{ route('ApMstr.index') }}" class="btn btn-sm btn-secondary">
-                                            <i class="bi bi-arrow-clockwise"></i> Reset
-                                        </a>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                    <button class="px-4 shadow-sm btn btn-primary fw-bold rounded-3" type="button"
+                        onclick="window.open('{{ route('AppayMstr.create') }}', '_blank')">
+                        <i class="bi bi-cash-stack me-2"></i>Bayar Hutang (Pay)
+                    </button>
                 </div>
+
                 <div class="card-body">
+                    <div class="mb-4 ux-filter-area">
+                        <form action="{{ route('ApMstr.index') }}" method="GET" class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label ux-sub-text fw-bold">DARI TANGGAL</label>
+                                <input type="date" name="start_date" class="border-0 shadow-sm form-control"
+                                    value="{{ request('start_date') }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label ux-sub-text fw-bold">SAMPAI TANGGAL</label>
+                                <input type="date" name="end_date" class="border-0 shadow-sm form-control"
+                                    value="{{ request('end_date') }}">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="px-4 shadow-sm btn btn-primary fw-bold rounded-3">
+                                    <i class="bi bi-filter"></i> Apply
+                                </button>
+                                <a href="{{ route('ApMstr.index') }}"
+                                    class="px-4 btn btn-light ms-2 rounded-3 text-muted">
+                                    Reset
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+
                     <div class="table-responsive">
-                        <table id="ApTable" class="table table-striped table-bordered table-sm nowrap">
-                            <thead class="table-dark">
+                        <table id="ApTable" class="table table-ux">
+                            <thead>
                                 <tr>
-                                    <th>No</th>
-                                    <th>AP #</th>
+                                    <th class="text-center" style="width:5%">No</th>
+                                    <th>No. Tagihan (AP#)</th>
                                     <th>Supplier</th>
-                                    <th>Tanggal</th>
-                                    <th>Jatuh Tempo</th>
-                                    <th>Total</th>
-                                    <th>Dibayar</th>
-                                    <th>Sisa</th>
-                                    <th>Status</th>
-                                    <th>Aksi</th>
+                                    <th>Info Tanggal</th>
+                                    <th class="text-end">Total Tagihan</th>
+                                    <th class="text-end">Sisa Bayar</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($aps as $ap)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $ap->ap_mstr_nbr }}</td>
-                                        <td>{{ $ap->supplier->supp_mstr_name }}</td>
-                                        <td>{{ $ap->ap_mstr_date }}</td>
-                                        <td>{{ $ap->ap_mstr_duedate }}</td>
-                                        <td class="text-end">{{ rupiah($ap->ap_mstr_amount) }}</td>
-                                        <td class="text-end">{{ rupiah($ap->ap_mstr_paid) }}</td>
-                                        <td class="text-end">{{ rupiah($ap->ap_mstr_balance) }}</td>
-                                        <td>
-                                            <span
-                                                class="badge bg-{{ $ap->ap_mstr_status == 'paid' ? 'success' : ($ap->ap_mstr_status == 'partial' ? 'warning' : 'danger') }}">
-                                                {{ strtoupper($ap->ap_mstr_status) }}
-                                            </span>
+                                        <td class="text-center">
+                                            <span class="ux-sub-text fw-bold">{{ $loop->iteration }}</span>
                                         </td>
                                         <td>
-                                            <a href="{{ route('ApMstr.show', $ap->ap_mstr_id) }}"
-                                                class="btn btn-sm btn-info"><i class="bi bi-folder"></i>
-                                            </a>
-
+                                            <span class="ux-main-text text-primary">{{ $ap->ap_mstr_nbr }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="ux-main-text">{{ $ap->supplier->supp_mstr_name }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="small">
+                                                <span class="d-block text-muted">Inv: {{ $ap->ap_mstr_date }}</span>
+                                                <span class="d-block text-danger">Due: {{ $ap->ap_mstr_duedate }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-end fw-bold">
+                                            {{ rupiah($ap->ap_mstr_amount) }}
+                                        </td>
+                                        <td class="text-end">
+                                            <span
+                                                class="{{ $ap->ap_mstr_balance > 0 ? 'text-danger fw-bold' : 'text-success' }}">
+                                                {{ rupiah($ap->ap_mstr_balance) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            @php
+                                                $status = strtolower($ap->ap_mstr_status);
+                                                $badgeClass = match ($status) {
+                                                    'paid' => 'bg-success',
+                                                    'partial' => 'bg-warning text-dark',
+                                                    default => 'bg-danger',
+                                                };
+                                            @endphp
+                                            <span class="badge {{ $badgeClass }} rounded-pill px-3">
+                                                {{ strtoupper($status) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <button class="btn-ux-action btn-view"
+                                                onclick="window.location.href='{{ route('ApMstr.show', $ap->ap_mstr_id) }}'"
+                                                title="Detail">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 @endforeach

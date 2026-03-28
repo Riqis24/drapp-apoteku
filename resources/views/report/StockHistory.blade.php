@@ -9,29 +9,35 @@
             <h3>History</h3>
         </div>
         <div class="page-content">
-            <div class="card">
-                <div class="card-header">
-
+            <div class="border-0 shadow-sm card ux-card">
+                <div class="ux-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 text-primary fw-bold">
+                        <i class="bi bi-clock-history me-2"></i>History Transaksi Produk
+                    </h5>
+                    <button type="button" class="px-3 btn btn-outline-secondary btn-sm rounded-pill"
+                        onclick="window.location.href='{{ route('Stock.index') }}'">
+                        <i class="bi bi-arrow-left me-1"></i> Kembali
+                    </button>
                 </div>
+
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="historyTable" class="table table-striped table-bordered table-sm nowrap">
-                            <thead class="table-dark">
+                        <table id="historyTable" class="table mb-0 align-middle table-ux nowrap" style="width:100%">
+                            <thead>
                                 <tr>
-                                    <th style="text-align: center">No</th>
-                                    <th style="text-align: center">Tanggal</th>
-                                    <th style="text-align: center">Product</th>
-                                    <th style="text-align: center">Kategori</th>
-                                    <th style="text-align: center">Location</th>
-                                    <th style="text-align: center">Batch No</th>
-                                    <th style="text-align: center">Exp Date</th>
-                                    <th style="text-align: center">Type</th>
-                                    <th style="text-align: center">Qty</th>
-                                    <th style="text-align: center">Price</th>
-                                    <th style="text-align: center">Sub Total</th>
-                                    <th style="text-align: center">Cust/Vend</th>
-                                    <th style="text-align: center">Reference</th>
-                                    <th style="text-align: center">Note</th>
+                                    <th class="text-center">No</th>
+                                    <th class="text-center">Tanggal</th>
+                                    <th>Product</th>
+                                    <th class="text-center">Kategori</th>
+                                    <th>Location</th>
+                                    <th class="text-center">Batch / Exp</th>
+                                    <th class="text-center">Type</th>
+                                    <th class="text-end">Qty</th>
+                                    <th class="text-end">Price</th>
+                                    <th class="text-end">Sub Total</th>
+                                    <th>Cust/Vend</th>
+                                    <th class="text-center">Reference</th>
+                                    <th>Note</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -39,24 +45,13 @@
                                     @php
                                         $lookupKey = $st->id;
                                         $itemInfo = $detailsMap[$lookupKey] ?? null;
-
                                         $unitPrice = $itemInfo['price'] ?? 0;
-                                        $subtotal =
-                                            $itemInfo && $itemInfo['total'] > 0
-                                                ? $itemInfo['total']
-                                                : $unitPrice * $st->quantity;
-                                        $subtotal = 0;
-                                        if ($itemInfo) {
-                                            // Jika ada di map, prioritas ambil 'total', jika tidak ada baru (price * qty)
-                                            $subtotal = $itemInfo['total'] ?? $itemInfo['price'] * $st->quantity;
-                                        } else {
-                                            // Jika tidak ada di map (seperti Stock Adjustment), subtotal bisa 0 atau (HPP * qty)
-                                            $subtotal = 0;
-                                        }
 
+                                        $subtotal = $itemInfo
+                                            ? $itemInfo['total'] ?? $itemInfo['price'] * $st->quantity
+                                            : 0;
                                         $isHpp = !$itemInfo;
 
-                                        // Logika Note
                                         $formNote =
                                             match ($st->source_type) {
                                                 \App\Models\SalesMstr::class => $st->source?->sales_mstr_note,
@@ -67,6 +62,7 @@
                                                 \App\Models\TsMstr::class => $st->source?->ts_mstr_note,
                                                 default => $st->note,
                                             } ?? '-';
+
                                         $referenceNbr =
                                             match ($st->source_type) {
                                                 \App\Models\SalesMstr::class => $st->source?->sales_mstr_nbr,
@@ -77,6 +73,7 @@
                                                 \App\Models\TsMstr::class => $st->source?->ts_mstr_nbr,
                                                 default => '-',
                                             } ?? '-';
+
                                         $route =
                                             match ($st->source_type) {
                                                 \App\Models\SalesMstr::class => 'SalesMstr.show',
@@ -89,59 +86,74 @@
                                             } ?? '-';
                                     @endphp
                                     <tr>
-                                        <td class="text-center">{{ $transactions->firstItem() + $index }}</td>
-                                        <td class="text-center">{{ $st->created_at }}</td>
+                                        <td class="text-center ux-sub-text">{{ $transactions->firstItem() + $index }}
+                                        </td>
+                                        <td class="text-center" style="font-size: 0.85rem;">
+                                            {{ \Carbon\Carbon::parse($st->created_at)->format('d/m/Y') }}<br>
+                                            <small
+                                                class="text-muted">{{ \Carbon\Carbon::parse($st->created_at)->format('H:i') }}</small>
+                                        </td>
                                         <td>
-                                            {{ $st->product->name }}
+                                            <span class="ux-main-text fw-bold">{{ $st->product->name }}</span>
                                             @if ($isHpp)
-                                                <small class="text-muted d-block" style="font-size: 7pt;">(HPP)</small>
+                                                <span class="p-0 border-0 badge bg-light text-dark"
+                                                    style="font-size: 10px;">(HPP)</span>
                                             @endif
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge bg-secondary">
-                                                {{ str_replace('App\Models\\', '', $st->source_type) }}
+                                            <span class="border badge bg-light text-secondary">
+                                                {{ str_replace('App\Models\\', '', str_replace('Mstr', '', $st->source_type)) }}
                                             </span>
                                         </td>
-                                        <td>{{ $st->location->loc_mstr_name ?? '-' }}</td>
-                                        <td class="text-center">{{ $st->batch->batch_mstr_no ?? '-' }}</td>
-                                        <td class="text-center">{{ $st->batch->batch_mstr_expireddate ?? '-' }}</td>
+                                        <td><i
+                                                class="bi bi-geo-alt text-muted me-1"></i>{{ $st->location->loc_mstr_name ?? '-' }}
+                                        </td>
                                         <td class="text-center">
-                                            <span class="badge {{ $st->type == 'in' ? 'bg-success' : 'bg-danger' }}">
+                                            <div class="ux-sub-text fw-bold text-dark">
+                                                {{ $st->batch->batch_mstr_no ?? '-' }}</div>
+                                            <small class="text-danger"
+                                                style="font-size: 10px;">{{ $st->batch->batch_mstr_expireddate ?? '-' }}</small>
+                                        </td>
+                                        <td class="text-center">
+                                            <span
+                                                class="badge {{ $st->type == 'in' ? 'bg-success' : 'bg-danger' }} rounded-pill"
+                                                style="min-width: 45px;">
                                                 {{ strtoupper($st->type) }}
                                             </span>
                                         </td>
-                                        <td class="text-end fw-bold">{{ (float) $st->quantity }}</td>
-                                        <td class="text-end">{{ number_format($unitPrice, 0, ',', '.') }}</td>
-                                        <td class="text-end">{{ number_format($subtotal, 0, ',', '.') }}</td>
-                                        <td>
-                                            @if ($st->source_type == \App\Models\SalesMstr::class)
-                                                {{ $st->source->customer->name ?? 'Umum' }}
-                                            @elseif ($st->source_type == \App\Models\SrMstr::class)
-                                                {{ $st->source->customer->name ?? 'Umum' }}
-                                            @elseif($st->source_type == \App\Models\BpbMstr::class)
-                                                {{ $st->source->supplier->supp_mstr_name ?? '-' }}
-                                            @elseif($st->source_type == \App\Models\PrMstr::class)
-                                                {{ $st->source->supplier->supp_mstr_name ?? '-' }}
-                                            @elseif($st->source_type == \App\Models\SaMstr::class)
-                                                -
-                                            @else
-                                                -
-                                            @endif
+                                        <td
+                                            class="text-end fw-bold {{ $st->type == 'in' ? 'text-success' : 'text-danger' }}">
+                                            {{ $st->type == 'in' ? '+' : '-' }}{{ (float) $st->quantity }}
+                                        </td>
+                                        <td class="text-end text-muted">{{ number_format($unitPrice, 0, ',', '.') }}
+                                        </td>
+                                        <td class="text-end fw-bold">{{ number_format($subtotal, 0, ',', '.') }}</td>
+                                        <td class="ux-sub-text">
+                                            @php
+                                                $entity = match ($st->source_type) {
+                                                    \App\Models\SalesMstr::class, \App\Models\SrMstr::class => $st
+                                                        ->source->customer->name ?? 'Umum',
+                                                    \App\Models\BpbMstr::class, \App\Models\PrMstr::class => $st->source
+                                                        ->supplier->supp_mstr_name ?? '-',
+                                                    default => '-',
+                                                };
+                                            @endphp
+                                            {{ $entity }}
                                         </td>
                                         <td class="text-center">
-                                            <span onclick="window.location.href='{{ route($route, $st->source_id) }}'"
-                                                class="text-primary fw-bold">{{ $referenceNbr ?? '-' }}</span>
+                                            <a href="{{ $route !== '-' ? route($route, $st->source_id) : '#' }}"
+                                                class="text-primary text-decoration-none fw-bold small">
+                                                {{ $referenceNbr }}
+                                            </a>
                                         </td>
-                                        <td class="small">{{ $formNote ?? '-' }}</td>
+                                        <td class="small text-muted"
+                                            style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">
+                                            {{ $formNote }}
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
-
                         </table>
-                        <button type="button" class="btn btn-dark"
-                            onclick="window.location.href='{{ route('Stock.index') }}'">
-                            Back
-                        </button>
                     </div>
                 </div>
             </div>

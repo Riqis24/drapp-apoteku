@@ -1,5 +1,6 @@
 <div class="sidebar-menu">
     <ul class="menu">
+        {{-- Dashboard --}}
         @role(['Super Admin', 'Admin', 'Owner'])
             <li class="sidebar-item {{ Route::is('dashboard.index') ? 'active' : '' }}">
                 <a href="{{ route('dashboard.index') }}" class="sidebar-link">
@@ -8,6 +9,8 @@
                 </a>
             </li>
         @endrole
+
+        {{-- POS Kasir --}}
         <li class="sidebar-item {{ Route::is('SalesMstr.cashier') ? 'active' : '' }}">
             <a href="{{ route('SalesMstr.cashier') }}" class="sidebar-link">
                 <i class="bi bi-cash"></i>
@@ -15,6 +18,7 @@
             </a>
         </li>
 
+        {{-- Penjualan --}}
         <li
             class="sidebar-item has-sub {{ Request::is('SalesMstr*', 'SrMstr*', 'ExpenseTransaction*', 'ArMstr*') ? 'active' : '' }}">
             <a href="#" class="sidebar-link">
@@ -37,6 +41,8 @@
                 </li>
             </ul>
         </li>
+
+        {{-- Pembelian --}}
         @role(['Super Admin', 'Admin', 'Owner'])
             <li
                 class="sidebar-item has-sub {{ Request::is('PurchaseOrder*', 'PrMstr*', 'BpbMstr*', 'ApMstr*') ? 'active' : '' }}">
@@ -59,6 +65,8 @@
                     </li>
                 </ul>
             </li>
+
+            {{-- Persediaan --}}
             <li class="sidebar-item has-sub {{ Request::is('TsMstr*', 'SaMstr*', 'SoMstr*') ? 'active' : '' }}">
                 <a href="#" class="sidebar-link">
                     <i class="bi bi-box-seam"></i>
@@ -77,17 +85,16 @@
                 </ul>
             </li>
         @endrole
+
+        {{-- Report --}}
         <li
             class="sidebar-item has-sub {{ Request::is('StockTransaction*', 'Stock/*', 'FinancialRecord*', 'ApMstr/SuppStatement*', 'ApMstr/Aging*', 'SummaryStockCard*') ? 'active' : '' }}">
             <a href="#" class="sidebar-link">
                 <i class="bi bi-journals"></i>
                 <span>Report</span>
             </a>
-
             <ul
                 class="submenu {{ Request::is('StockTransaction*', 'Stock/*', 'FinancialRecord*', 'ApMstr/SuppStatement*', 'ApMstr/Aging*', 'SummaryStockCard*') ? 'active' : '' }}">
-
-                {{-- Menu Khusus Admin/Owner --}}
                 @role(['Super Admin', 'Admin', 'Owner'])
                     <li class="submenu-item {{ Route::is('ApMstr.SuppStatement') ? 'active' : '' }}">
                         <a href="{{ route('ApMstr.SuppStatement') }}" class="submenu-link">Lap. Rekening Pemasok</a>
@@ -97,7 +104,6 @@
                     </li>
                 @endrole
 
-                {{-- Menu Umum --}}
                 <li class="submenu-item {{ Route::is('StockTransaction.index') ? 'active' : '' }}">
                     <a href="{{ route('StockTransaction.index') }}" class="submenu-link">Transaksi Histori</a>
                 </li>
@@ -111,16 +117,15 @@
                     <a href="{{ route('SummaryStockCard') }}" class="submenu-link">Kartu Stok (Rekap)</a>
                 </li>
 
-                {{-- Menu Finansial Khusus Admin/Owner --}}
                 @role(['Super Admin', 'Admin', 'Owner'])
                     <li class="submenu-item {{ Route::is('FinancialRecord.*') ? 'active' : '' }}">
                         <a href="{{ route('FinancialRecord.index') }}" class="submenu-link">Catatan Keuangan</a>
                     </li>
                 @endrole
-
             </ul>
         </li>
 
+        {{-- Master Data --}}
         @role(['Super Admin', 'Owner'])
             <li
                 class="sidebar-item has-sub {{ Request::is('Product*', 'Measurement*', 'CustMstr*', 'Supplier*', 'LocMstr*', 'Price*', 'Store*') ? 'active' : '' }}">
@@ -161,6 +166,7 @@
             </li>
         @endrole
 
+        {{-- Config --}}
         @role('Super Admin')
             <li
                 class="sidebar-item has-sub {{ Request::is('UserMstr*', 'RoleMstr*', 'PermissionMstr*', 'settings*') ? 'active' : '' }}">
@@ -185,10 +191,9 @@
                 </ul>
             </li>
         @endrole
-
     </ul>
 
-    <div class="p-3 border-top w-100 mt-auto" style="text-align:center">
+    <div class="p-3 mt-auto border-top w-100" style="text-align:center">
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="btn btn-outline-danger w-100">

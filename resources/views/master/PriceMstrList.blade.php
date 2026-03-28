@@ -9,41 +9,63 @@
             <h3>Price Master</h3>
         </div>
         <div class="page-content">
-            <div class="card">
-                <div class="card-header">
-                    <button class="btn btn-outline-primary btn-sm rounded" type="button" data-bs-toggle="modal"
-                        data-bs-target="#modalAddPrice">
-                        Add Price
+            <div class="card ux-card">
+                <div class="ux-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 text-primary fw-bold">
+                        <i class="bi bi-tags-fill me-2"></i>Master Harga Produk
+                    </h5>
+
+                    <button class="px-4 shadow-sm btn btn-primary fw-bold rounded-3" type="button"
+                        data-bs-toggle="modal" data-bs-target="#modalAddPrice">
+                        <i class="bi bi-plus-lg me-2"></i>Add Price
                     </button>
                 </div>
+
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table id="priceTable" class="table table-striped table-bordered table-sm nowrap"
-                            style="width:100%">
-                            <thead class="table-dark">
+                    <div class="border-0 table-responsive">
+                        <table id="priceTable" class="table align-middle table-ux nowrap" style="width:100%">
+                            <thead>
                                 <tr>
-                                    <th style="width:5%; text-align: center">No</th>
-                                    <th style="text-align: center">Product</th>
-                                    <th style="width:20%; text-align: center">Measurement</th>
-                                    <th style="width:20%; text-align: center">Price</th>
-                                    <th style="width:5%; text-align: center">Action</th>
+                                    <th class="text-center" style="width:5%">No</th>
+                                    <th>Product</th>
+                                    <th class="text-center" style="width:15%">Measurement</th>
+                                    <th class="text-end" style="width:20%">Price</th>
+                                    <th class="text-center" style="width:10%">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($prices as $price)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $price->productMeasurement->product->name }}</td>
-                                        <td>{{ $price->productMeasurement->measurement->name }}</td>
-                                        <td>{{ rupiah($price->price) }}</td>
-                                        <td style="text-align: center">
-                                            <button class="btn btn-sm btn-warning btn-edit-price"
-                                                data-price-id="{{ $price->id }}"><i class="bi bi-pen"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-danger rounded"
-                                                onclick="window.location.href=''">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
+                                        <td class="text-center">
+                                            <span class="ux-sub-text fw-bold">{{ $loop->iteration }}</span>
+                                        </td>
+                                        <td>
+                                            <span
+                                                class="ux-main-text fw-bold">{{ $price->productMeasurement->product->name }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="px-3 border badge bg-light text-dark">
+                                                {{ $price->productMeasurement->measurement->name }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="fw-bold text-primary">
+                                                {{ rupiah($price->price) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="gap-2 d-flex justify-content-center">
+                                                <button class="btn-ux-action btn-edit btn-edit-price"
+                                                    data-price-id="{{ $price->id }}" title="Edit Harga">
+                                                    <i class="bi bi-pencil-fill"></i>
+                                                </button>
+
+                                                <button type="button" class="btn-ux-action btn-delete"
+                                                    onclick="confirmDeletePrice('{{ $price->id }}')"
+                                                    title="Hapus Harga">
+                                                    <i class="bi bi-trash3-fill"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach

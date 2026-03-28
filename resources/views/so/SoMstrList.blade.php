@@ -9,89 +9,110 @@
             <h3>Stock Opname</h3>
         </div>
         <div class="page-content">
-            <div class="card">
-                <div class="card-header bg-white py-3">
-                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                        <div>
-                            <button class="btn btn-outline-primary btn-sm rounded" type="button"
-                                onclick="window.location.href='{{ route('SoMstr.create') }}'">
-                                Create Stok Opname
-                            </button>
-                        </div>
+            <div class="card ux-card">
+                <div class="ux-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0 text-primary fw-bold">
+                        <i class="bi bi-clipboard-check me-2"></i>Stock Opname
+                    </h5>
 
-                        <div class="flex-grow-1">
-                            <form action="{{ route('SoMstr.index') }}" method="GET"
-                                class="row g-2 justify-content-md-end align-items-end">
-                                <div class="col-6 col-md-3 col-lg-2">
-                                    <label class="form-label small mb-1 fw-bold">Dari Tanggal</label>
-                                    <input type="date" name="start_date" class="form-control form-control-sm"
-                                        value="{{ request('start_date') }}">
-                                </div>
-                                <div class="col-6 col-md-3 col-lg-2">
-                                    <label class="form-label small mb-1 fw-bold">Sampai Tanggal</label>
-                                    <input type="date" name="end_date" class="form-control form-control-sm"
-                                        value="{{ request('end_date') }}">
-                                </div>
-                                <div class="col-12 col-md-auto">
-                                    <div class="btn-group w-100">
-                                        <button type="submit" class="btn btn-sm btn-primary">
-                                            <i class="bi bi-filter"></i> Filter
-                                        </button>
-                                        <a href="{{ route('SoMstr.index') }}" class="btn btn-sm btn-secondary">
-                                            <i class="bi bi-arrow-clockwise"></i> Reset
-                                        </a>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                    <button class="px-4 shadow-sm btn btn-primary fw-bold rounded-3" type="button"
+                        onclick="window.location.href='{{ route('SoMstr.create') }}'">
+                        <i class="bi bi-plus-lg me-2"></i>Create Stock Opname
+                    </button>
                 </div>
+
                 <div class="card-body">
+                    <div class="mb-4 ux-filter-area">
+                        <form action="{{ route('SoMstr.index') }}" method="GET" class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label ux-sub-text fw-bold">DARI TANGGAL</label>
+                                <input type="date" name="start_date" class="border-0 shadow-sm form-control"
+                                    value="{{ request('start_date') }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label ux-sub-text fw-bold">SAMPAI TANGGAL</label>
+                                <input type="date" name="end_date" class="border-0 shadow-sm form-control"
+                                    value="{{ request('end_date') }}">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="px-4 shadow-sm btn btn-primary fw-bold rounded-3">
+                                    <i class="bi bi-filter"></i> Apply
+                                </button>
+                                <a href="{{ route('SoMstr.index') }}"
+                                    class="px-4 btn btn-light ms-2 rounded-3 text-muted">
+                                    Reset
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+
                     <div class="table-responsive">
-                        <table id="SoTable" class="table table-striped table-bordered table-sm nowrap"
-                            style="width:100%">
-                            <thead class="table-dark">
+                        <table id="SoTable" class="table table-ux">
+                            <thead>
                                 <tr>
-                                    <th style="text-align: center; width: 5%;">No</th>
-                                    <th style="text-align: center">SO#</th>
-                                    <th style="text-align: center; width: 15%;">Tanggal</th>
-                                    <th style="text-align: center; width: 15%;">Lokasi</th>
-                                    <th style="text-align: center; width: 10%;">Status</th>
-                                    <th style="text-align: center; width: 10%;">Aksi</th>
+                                    <th class="text-center" style="width:5%">No</th>
+                                    <th>No. Opname (SO#)</th>
+                                    <th class="text-center">Tanggal</th>
+                                    <th>Lokasi / Gudang</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($opnames as $so)
                                     <tr>
-                                        <td style="text-align: right">{{ $loop->iteration }}</td>
-                                        <td style="text-align: left">{{ $so->so_mstr_nbr }}</td>
-                                        <td style="text-align: center">{{ $so->so_mstr_date }}</td>
-                                        <td style="text-align: center">{{ $so->location->loc_mstr_name ?? '-' }}
+                                        <td class="text-center">
+                                            <span class="ux-sub-text fw-bold">{{ $loop->iteration }}</span>
                                         </td>
-                                        <td style="text-align: center">
+                                        <td>
+                                            <span class="ux-main-text text-primary">{{ $so->so_mstr_nbr }}</span>
+                                        </td>
+                                        <td class="text-center">
                                             <span
-                                                class="badge bg-{{ $so->so_mstr_status == 'approved' ? 'success' : 'warning' }}">
-                                                {{ strtoupper($so->so_mstr_status) }}
+                                                class="ux-main-text">{{ \Carbon\Carbon::parse($so->so_mstr_date)->format('d/m/Y') }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="border badge bg-light text-secondary fw-normal">
+                                                <i
+                                                    class="bi bi-geo-alt me-1"></i>{{ $so->location->loc_mstr_name ?? '-' }}
                                             </span>
                                         </td>
-                                        <td style="text-align: center">
-                                            <a href="{{ route('SoMstr.edit', $so->so_mstr_id) }}"
-                                                class="btn btn-sm btn-info">
-                                                <i class="bi bi-folder"></i>
-                                            </a>
-                                            <a href="{{ route('SoMstr.viewApprove', $so->so_mstr_id) }}"
-                                                class="btn btn-sm btn-success">
-                                                <i class="bi bi-check-square"></i>
-                                            </a>
-                                            <form action="{{ route('SoMstr.destroy', $so->so_mstr_id) }}"
-                                                method="POST" class="d-inline" id="delete-form-{{ $so->so_mstr_id }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="button" class="btn btn-sm btn-danger"
-                                                    onclick="handleDelete('{{ $so->so_mstr_id }}')">
-                                                    <i class="bi bi-trash"></i>
+                                        <td class="text-center">
+                                            @php
+                                                $status = strtolower($so->so_mstr_status);
+                                                $badgeClass =
+                                                    $status == 'approved' ? 'bg-success' : 'bg-warning text-dark';
+                                            @endphp
+                                            <span class="badge {{ $badgeClass }} rounded-pill px-3">
+                                                {{ strtoupper($status) }}
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="gap-2 d-flex justify-content-center">
+                                                <button class="btn-ux-action btn-view"
+                                                    onclick="window.location.href='{{ route('SoMstr.edit', $so->so_mstr_id) }}'"
+                                                    title="Edit/Detail">
+                                                    <i class="bi bi-pencil-square"></i>
                                                 </button>
-                                            </form>
+
+                                                @if ($status !== 'approved')
+                                                    <button class="btn-ux-action btn-success-light text-success"
+                                                        onclick="window.location.href='{{ route('SoMstr.viewApprove', $so->so_mstr_id) }}'"
+                                                        title="Approve">
+                                                        <i class="bi bi-check-circle-fill"></i>
+                                                    </button>
+                                                @endif
+
+                                                <form action="{{ route('SoMstr.destroy', $so->so_mstr_id) }}"
+                                                    method="POST" class="d-inline"
+                                                    id="delete-form-{{ $so->so_mstr_id }}">
+                                                    @csrf @method('DELETE')
+                                                    <button type="button" class="btn-ux-action btn-delete"
+                                                        onclick="handleDelete('{{ $so->so_mstr_id }}')" title="Hapus">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -99,7 +120,6 @@
                         </table>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
