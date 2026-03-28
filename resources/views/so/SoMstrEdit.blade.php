@@ -1,20 +1,20 @@
 <x-app-layout>
     <div id="main">
-        <div class="page-heading mb-3">
+        <div class="mb-3 page-heading">
             <h3>Stock Opname</h3>
-            <p class="text-muted mb-0">
+            <p class="mb-0 text-muted">
                 Lokasi: <strong>{{ $so->location->loc_mstr_name }}</strong>
             </p>
             @if ($so->so_mstr_status == 'draft')
-                <span class="badge bg-warning mt-2">
+                <span class="mt-2 badge bg-warning">
                     Status: {{ Str::upper($so->so_mstr_status) }}
                 </span>
             @elseif($so->so_mstr_status == 'approved')
-                <span class="badge bg-success mt-2">
+                <span class="mt-2 badge bg-success">
                     Status: {{ Str::upper($so->so_mstr_status) }}
                 </span>
             @else
-                <span class="badge bg-info mt-2">
+                <span class="mt-2 badge bg-info">
                     Status: {{ Str::upper('submitted') }}
                 </span>
             @endif
@@ -22,7 +22,7 @@
         </div>
 
         <div class="page-content">
-            <div class="card shadow-sm">
+            <div class="shadow-sm card">
                 <div class="card-body">
 
                     {{-- INFO --}}
@@ -31,7 +31,7 @@
                     </div>
 
                     {{-- ADD ITEM --}}
-                    <div class="card mb-3 border">
+                    <div class="mb-3 border card">
                         <div class="card-header bg-light">
                             ➕ Tambah Item ke Stock Opname
                         </div>
@@ -72,8 +72,8 @@
                         @csrf
                         @method('PUT')
 
-                        <div class="table-responsive card card-body border">
-                            <table id="ExpenseTable" class="table table-sm table-bordered align-middle">
+                        <div class="border table-responsive card card-body">
+                            <table id="ExpenseTable" class="table align-middle table-sm table-bordered">
                                 <thead class="table-primary">
                                     <tr>
                                         <th class="text-center">No</th>
@@ -87,66 +87,68 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($so->details as $det)
-                                        @php
-                                            $diff = $det->so_det_qtyphysical - $det->so_det_qtysystem;
-                                        @endphp
-                                        <tr class="{{ $diff != 0 ? 'table-warning' : '' }}">
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $det->product->name ?? '-' }} | {{ $det->batch->batch_mstr_no }}
-                                                ({{ $det->batch->batch_mstr_expireddate }})
-                                            </td>
-
-                                            <td class="text-end">
-                                                {{ numfmt($det->so_det_qtysystem) }}
-                                            </td>
-
-                                            <td>
-                                                <input type="number" step="0.01"
-                                                    name="details[{{ $det->so_det_id }}][qty_physical]"
-                                                    value="{{ $det->so_det_qtyphysical }}"
-                                                    class="form-control form-control-sm">
-                                            </td>
-
-                                            <td>
-                                                {{ $det->product->measurement->name }}
-                                            </td>
-
-                                            <td class="text-end fw-bold {{ $diff != 0 ? 'text-danger' : '' }}">
-                                                {{ numfmt($diff) }}
-                                            </td>
-
-                                            <td>
-                                                <input type="text" name="details[{{ $det->so_det_id }}][note]"
-                                                    value="{{ $det->so_det_note }}"
-                                                    class="form-control form-control-sm">
-                                            </td>
-
-                                            <td class="text-center">
-                                                <button type="button" class="btn btn-sm btn-outline-danger btn-delete"
-                                                    data-id="{{ $det->so_det_id }}">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-
                                     @if ($so->details->isEmpty())
                                         <tr>
-                                            <td colspan="6" class="text-center text-muted">
+                                            <td colspan="8" class="text-center text-muted">
                                                 Belum ada item
                                             </td>
                                         </tr>
+                                    @else
+                                        @foreach ($so->details as $det)
+                                            @php
+                                                $diff = $det->so_det_qtyphysical - $det->so_det_qtysystem;
+                                            @endphp
+                                            <tr class="{{ $diff != 0 ? 'table-warning' : '' }}">
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $det->product->name ?? '-' }} |
+                                                    {{ $det->batch->batch_mstr_no }}
+                                                    ({{ $det->batch->batch_mstr_expireddate }})
+                                                </td>
+
+                                                <td class="text-end">
+                                                    {{ numfmt($det->so_det_qtysystem) }}
+                                                </td>
+
+                                                <td>
+                                                    <input type="number" step="0.01"
+                                                        name="details[{{ $det->so_det_id }}][qty_physical]"
+                                                        value="{{ $det->so_det_qtyphysical }}"
+                                                        class="form-control form-control-sm">
+                                                </td>
+
+                                                <td>
+                                                    {{ $det->product->measurement->name }}
+                                                </td>
+
+                                                <td class="text-end fw-bold {{ $diff != 0 ? 'text-danger' : '' }}">
+                                                    {{ numfmt($diff) }}
+                                                </td>
+
+                                                <td>
+                                                    <input type="text" name="details[{{ $det->so_det_id }}][note]"
+                                                        value="{{ $det->so_det_note }}"
+                                                        class="form-control form-control-sm">
+                                                </td>
+
+                                                <td class="text-center">
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-outline-danger btn-delete"
+                                                        data-id="{{ $det->so_det_id }}">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
                                     @endif
                                 </tbody>
                             </table>
                         </div>
 
-                        <button class="btn btn-success mt-2">
+                        <button class="mt-2 btn btn-success">
                             💾 Simpan Perubahan
                         </button>
                         <button type="button" onclick="window.location.href='{{ route('SoMstr.index') }}'"
-                            class="btn btn-dark mt-2">Back</button>
+                            class="mt-2 btn btn-dark">Back</button>
                     </form>
                 </div>
             </div>
